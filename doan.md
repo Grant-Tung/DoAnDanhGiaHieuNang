@@ -81,8 +81,8 @@ S1–S4 cùng tổng trễ trung bình 50 ms → mỗi cặp chỉ khác **một
 |---|---|---|---|
 | 1 | ✅ Tắt đồng bộ giờ VMware + Ubuntu; lấy mã commit; viết `config_scenario.sh` (B-8.1); ping kiểm tra S0–S4 | Tùng | Ping khớp bảng B-8.1 |
 | 2 | ✅ Chạy thử `-v 4 -x` (Tùng, 24/10); ⬜ sửa `parse_log.py` theo định dạng runner (B-10.1) | Tuyến | Ra đúng CSV từ thư mục `runs/pilot/` |
-| 3 | 🔄 Runner `scripts/run_matrix.sh` đã viết; pilot 4 mode × {S0, S4} × 1 lượt | Tùng | 8 run "ok"; S4 lệch ≈ −15 ms |
-| 4 | Chạy 100 run (để qua đêm) | Tùng | Đủ 100 dòng metadata |
+| 3 | ✅ Runner `scripts/run_matrix.sh`; pilot 8/8 ok, S4 lệch −15,0 ms (24/10) | Tùng | 8 run "ok"; S4 lệch ≈ −15 ms |
+| 4 | ⏭️ Chạy 100 run: `sudo ./run_matrix.sh main` (~8 giờ 40, để qua đêm) | Tùng | Đủ 100 dòng "ok" trong `runs/main/metadata.csv` |
 | 5 | Tính chỉ số, vẽ 4–5 biểu đồ | Tuyến | Có biểu đồ chính |
 | 6 | Viết: Tuyến Ch.2 + Ch.4; Tùng Ch.3 | Cả hai | Bản nháp đủ |
 | 7 | *(tuỳ chọn)* Chèn trễ xử lý phía server | Cả hai | |
@@ -680,7 +680,7 @@ runs/<pilot|main>/
 | T10 | `config_scenario.sh` | Tùng | ✅ 24/10 | Bản 25 ms, mục 8.1 |
 | T11 | Kiểm chứng qdisc + ping S0–S4 | Tùng | ✅ 24/10 | Đạt (ping-01); S3 đo lại 500 gói |
 | T12–T14 | Pipeline phân tích | Tuyến | ⬜ | |
-| T15–T17 | Runner + pilot (S0, S4) | Tùng | ⬜ | |
+| T15–T17 | Runner + pilot (S0, S4) | Tùng | ✅ 24/10 | 8/8 ok; S4 −15,0 ms |
 | T18 | Ma trận chính 100 run (4 mode × 5 KB × 5 lặp) | Tùng | ⬜ | `-i 1`, bỏ 60 s, 120 request/run |
 | T19–T20 | QA dữ liệu + PCAP | Tuyến | ⬜ | Xác nhận 180 B bằng PCAP |
 | T21 | *(tuỳ chọn)* Chèn trễ xử lý phía server | Cả hai | ⬜ | Chỉ sau T18 + có biểu đồ chính |
@@ -702,7 +702,7 @@ runs/<pilot|main>/
 | 24/10/2026 | ping-01 | S0–S4 | ping 100 gói/KB, `-i 0.2` | ~2 phút | Tùng | S0 0,076 ms · S1 50,58 ms · S2 35,2/50,3/66,6 sd 7,6 · S3 mất 16%, 34,1/50,1/68,5 · S4 50,56 ms | Đạt. S3 mất 16% (kỳ vọng ~10%) → đo lại 500 gói. File `checks/ping_all.txt` trên máy Tùng |
 | 24/10/2026 | ping-02 | S3 | ping 500 gói | ~100 s | Tùng | mất **10,2%**; RTT 31,6/50,5/69,6, sd 8,3 | Đạt (lý thuyết 9,75%). `checks/ping_S3_500.txt` |
 | 24/10/2026 | mode-01 | S0 | M1–M4, `-i 1`, 40 s/mode | ~3 phút | Tùng | Mỗi mode 20 mẫu; `-v 4 -x` và `-v 5 -x` có 19 Interleaved (mẫu đầu Basic) | **M2 chạy được.** Quan sát: S0 offset ±0,04–0,38 ms, delay 0,38–1,7 ms → nhiễu nền (VM + Python) lớn hơn dự đoán "vài chục µs"; theo dõi trong 100 run. `checks/mode_*.log` |
-| 24/10/2026 | pilot | S0, S4 | M1–M4 × 1 lặp, runner | 14:13–14:54 | Tùng | 8/8 ok; 149 mẫu/run (119 sau warm-up); M2/M4: 148 Interleaved; sent = recv = 149 | Runner chạy đúng. Kiểm tra lệch S4 ≈ −15 ms: lần đầu ra 0 do lỗi locale `awk` → chạy lại với `LC_ALL=C` |
+| 24/10/2026 | pilot | S0, S4 | M1–M4 × 1 lặp, runner | 14:13–14:54 | Tùng | 8/8 ok; 149 mẫu/run (119 sau warm-up); M2/M4: 148 Interleaved; sent = recv = 149 | **Pilot đạt.** Lệch trung bình sau warm-up: S4 = −15,011 (M2) · −15,016 (M1) · −14,990 (M4) · −15,027 (M3) ms (lý thuyết −15); S0 = −16 (M3) · +2 (M4) · +17 (M2) · +2 (M1) µs. Xác nhận chiều NetEm, dấu offset, runner, warm-up. Số pilot không dùng làm kết quả |
 | | | | | | | | |
 
 ---
@@ -830,8 +830,17 @@ sudo ip netns exec ntp-s tc -s qdisc show dev veth-s
 sudo ip netns exec ntp-s tcpdump -i veth-s -w run.pcap udp port 10123
 sudo ip netns exec ntp-s tcpdump -i veth-s -X udp port 10123            # xem nội dung gói
 
-# Máy thật: kiểm tra card có HW timestamp
-ethtool -T <tên_card>
+# Runner (chạy trong ~/Desktop/ntp5-exp)
+sudo ./run_matrix.sh pilot        # 8 run, ~42 phút
+sudo ./run_matrix.sh main         # 100 run, ~8 giờ 40; bị ngắt → chạy lại đúng lệnh này
+
+# Kiểm tra nhanh lệch trung bình mỗi run (bỏ 60 s đầu) — BẮT BUỘC có LC_ALL=C
+for d in runs/main/*_S*/; do
+  LC_ALL=C awk 'NR==1{t0=$1} /mode offset=/{ if($1-t0>=60){ split($0,a,"offset="); split(a[2],b," "); s+=b[1]; n++ } } END{ printf "%-26s n=%3d  lech_tb=%+.6f s\n", FILENAME, n, (n?s/n:0) }' "$d/client.log"
+done
+
+# Đóng gói dữ liệu gửi Tuyến
+tar czf runs_main.tgz runs/main
 ```
 
 Lỗi thường gặp:
@@ -854,3 +863,4 @@ Lỗi thường gặp:
 | 24/10/2026 | Tùng (+AI) | Thêm Phần A (đọc nhanh) |
 | 24/10/2026 | Tùng + Tuyến | **🔒 Chốt phạm vi (A0):** 4 mode, S1–S4 trễ trung bình 25 ms/chiều, 100 run, `-i 1` + bỏ 60 s + 120 request/run, 4 RQ, thống kê đơn giản; máy thật/S5/kiểm định nâng cao → hướng phát triển. Sửa script 8.1, bảng ping, dự đoán mục 9, tiến độ, kho ý tưởng, cheat sheet |
 | 24/10/2026 | Tùng (+AI) | T10–T11 xong; M2 xác nhận chạy được; thêm `scripts/config_scenario.sh`, `scripts/run_matrix.sh`, định dạng output runner (B-10.1) |
+| 24/10/2026 | Tùng (+AI) | Pilot đạt (S4 −15,0 ms, 8/8 ok); T15–T17 ✅; cheat sheet thêm lệnh runner + kiểm tra nhanh |
