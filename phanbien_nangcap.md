@@ -1,5 +1,25 @@
 # Phản biện & nâng cấp phương pháp — Đồ án NTPv5
 
+## ★ Bảng đề xuất chờ duyệt
+
+> Đây là "hộp góp ý". Mỗi đề xuất có trạng thái: ⏳ chờ duyệt · ✅ chấp nhận (đã chuyển vào `doan.md`) · ❌ bác bỏ (ghi lý do).
+> Góp ý mới → thêm dòng **D-số tiếp theo** vào bảng, ghi người đề xuất, ngày, mục chi tiết.
+
+| Mã | Đề xuất | Người đề xuất | Ngày | Chi tiết | Trạng thái | Ghi chú quyết định |
+|---|---|---|---|---|---|---|
+| D1 | Đổi tên đề tài: "…ước lượng độ lệch thời gian của NTPv4 và NTPv5 ở chế độ Basic và Interleaved…" | Nhóm + AI | 24/10 | mục 1.1 | ⏳ | Cần hỏi GVHD |
+| D2 | 4 mode (thêm M2 = NTPv4 Interleaved `-v 4 -x`) | Nhóm | 24/10 | mục 2.1 | ⏳ | |
+| D3 | Mọi kịch bản trễ trung bình 25 ms/chiều; S3 = S2 + loss 5%; S4 = 10/40 | Nhóm + AI | 24/10 | mục 2.2 | ⏳ | |
+| D4 | 100 run (4 × 5 × 5), ≥ 100 request/run, poll `-i 1`, khởi động lại server mỗi run, xáo trộn theo khối | Nhóm + AI | 24/10 | mục 2.3 | ⏳ | |
+| D5 | Dữ liệu 2 tầng (raw sample + run metadata) với các cột bổ sung | Nhóm + AI | 24/10 | mục 4 | ⏳ | |
+| D6 | Thống kê: run là đơn vị; kiểm định hoán vị; kiểm định tương đương với Δ chốt sau pilot | AI | 24/10 | mục 5 | ⏳ | |
+| D7 | Hướng nâng cao duy nhất: chèn trễ xử lý phía server | Nhóm + AI | 24/10 | mục 6 | ⏳ | |
+| D8 | Bỏ S5c (hạ phiên bản) khỏi hướng nâng cao | AI | 24/10 | mục 3 #3 | ⏳ | |
+| D9 | Tắt VMware timesync + timesyncd trước mọi run | AI | 24/10 | mục 2.4 | ⏳ | Nên chấp nhận ngay |
+| D10 | Kịch bản máy thật (Wi-Fi, HW timestamp) — chỉ sau ma trận chính | AI | 24/10 | `doan.md` B-8.3 | ⏳ | Tuỳ chọn |
+
+---
+
 > Trả lời tài liệu "TÓM TẮT ĐỒ ÁN NTPv5 — BẢN GỬI AI RÀ SOÁT VÀ NÂNG CẤP" (24/10/2026).
 > Người đọc: Tùng (P2), Tuyến (P1).
 > Nguồn đã đọc trực tiếp ngày 24/10/2026: `ntpnode.py` nhánh `master` trên GitHub, RFC 9769 (rfc-editor.org), man page tc-netem (man7.org), trang Datatracker của draft-ietf-ntp-ntpv5. Thêm vào đó là output `grep`/`sed` Tùng chạy trên bản clone ở máy P2.

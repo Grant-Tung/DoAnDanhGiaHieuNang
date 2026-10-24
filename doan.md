@@ -2,7 +2,87 @@
 
 > **Người dùng chung:** Tùng (P2) và Tuyến (P1).
 > **Cập nhật lần cuối:** 24/10/2026 (Tùng).
-> File `phantich.md` (cùng thư mục) là bản context viết cho AI. File này là bản cho **người đọc** — dùng để theo dõi công việc, ghi kết quả test và làm nguồn viết báo cáo.
+> File gồm 2 phần: **Phần A — Đọc nhanh** (dễ hiểu, đọc trước) và **Phần B — Chi tiết** (chính xác, dùng khi làm thí nghiệm và viết báo cáo).
+> Phần A chỉ tóm tắt Phần B. Khi hai phần khác nhau, **Phần B đúng** → sửa lại Phần A.
+
+---
+
+# PHẦN A — ĐỌC NHANH
+
+## A1. Đồ án làm gì (3 câu)
+- Đồng hồ máy tính chạy lệch dần. **NTP** là cách máy tính hỏi giờ một máy chuẩn qua mạng để biết mình lệch bao nhiêu.
+- **NTPv4** đang dùng khắp nơi. **NTPv5** là bản mới, đang ở dạng **bản nháp** (chưa thành chuẩn chính thức) do người viết phần mềm chrony soạn.
+- Nhóm đo: **khi mạng xấu, NTPv5 ước lượng độ lệch giờ có tốt hơn NTPv4 không, và vì sao.**
+
+## A2. Lab hoạt động thế nào
+```
+┌────────── 1 máy ảo Ubuntu (1 đồng hồ chung) ──────────┐
+│  [Phòng client]  ═══ ống nối ═══  [Phòng server]       │
+│        ▲ "phòng chờ" NetEm làm chậm/làm mất gói ▲      │
+└───────────────────────────────────────────────────────┘
+```
+- 2 "phòng" (namespace) giả làm 2 máy, nối bằng "ống" (veth).
+- **NetEm** làm mạng xấu: chậm, giật, mất gói, đi–về không đều.
+- Hai phòng **dùng chung 1 đồng hồ** → giờ thật lệch = 0 → NTP báo lệch bao nhiêu thì đó chính là **sai số**. Không cần thiết bị đo chuẩn.
+- Phần mềm: `ntpnode.py` của chính tác giả NTPv5.
+
+## A3. So sánh những gì
+| Mã | Tên | Hiểu đơn giản |
+|---|---|---|
+| M1 | NTPv4 Basic | Bản cũ, hỏi giờ bình thường |
+| M2 | NTPv4 Interleaved | Bản cũ, server báo "giờ gửi chính xác của lần trước" *(đề xuất thêm, chưa chốt)* |
+| M3 | NTPv5 Basic | Bản mới, hỏi giờ bình thường |
+| M4 | NTPv5 Interleaved | Bản mới, kiểu "báo giờ lần trước" |
+
+**Basic vs Interleaved** = ghi giờ lên phong bì *trước khi* gửi (hơi sớm) vs gửi xong mới ghi giờ đúng rồi báo trong *lá thư sau*.
+
+## A4. Năm loại mạng xấu
+| KB | Mạng | Để trả lời |
+|---|---|---|
+| S0 | Hoàn hảo | Mốc chuẩn |
+| S1 | Chậm đều 2 chiều | Chậm đều có gây sai không? |
+| S2 | Chậm + giật | Giật lag thì sao? |
+| S3 | Như S2 + mất 5% gói | Mất gói thì sao? |
+| S4 | Đi nhanh, về chậm | "Điểm mù" của mọi NTP |
+
+## A5. Dự đoán kết quả (chưa đo — chỉ để đối chiếu)
+- **v4 và v5 gần như bằng nhau** — vì công thức tính giờ giống hệt.
+- **Interleaved chỉ hơn chút xíu** (vài chục micro giây) — vì lab không có phần cứng ghi giờ, mà Interleaved sinh ra để dùng phần cứng.
+- **S4: cả 4 cùng sai khoảng 15 ms** — NTP luôn tin "đi = về", không cách nào biết sai. Đây là biểu đồ mạnh nhất.
+- **S3: Interleaved của v4 mất nhịp nhiều hơn v5** — vì server v4 xoá giờ đã dùng, v5 giữ lại.
+- **Kết luận dự kiến:** NTPv5 tiến bộ về *thiết kế và bảo mật*, không phải về *độ chính xác*. Kết quả "không thắng" vẫn là kết quả tốt nếu đo đúng và giải thích được.
+
+## A6. Đang ở đâu & làm gì tiếp
+- ✅ Dựng lab, chạy được 3 chế độ, đọc xong mã `ntpnode.py`.
+- ⏭️ **Tùng:** lấy mã commit (`git -C ~/Desktop/ntp5-exp rev-parse HEAD`), tắt đồng bộ giờ của VMware/Ubuntu, viết script mạng xấu, ping kiểm tra.
+- ⏭️ **Tuyến:** chạy thử `-v 4 -x`, sửa `parse_log.py` (thêm cột chế độ yêu cầu/thực tế, đếm gói gửi/nhận), đọc code ghép T1/T4 khi mất gói.
+- ⏭️ **Cả hai:** chốt có dùng 4 mode + kịch bản 25 ms không (đang chờ trong `phanbien_nangcap.md`).
+- Chi tiết: Phần B mục 11 (tiến độ), mục 16 (câu hỏi mở).
+
+## A7. Năm điều KHÔNG được viết sai trong báo cáo
+1. ❌ "Header NTPv5 180 byte" → ✅ header **48 byte**; 180 byte là cả gói của công cụ.
+2. ❌ "NTPv5 là chuẩn" → ✅ **bản nháp** (Internet-Draft), chưa thành RFC.
+3. ❌ "Interleaved xoá trễ hàng đợi" → ✅ chỉ giảm sai số **bên trong máy server**.
+4. ❌ "NTPv5 chỉnh giờ chính xác hơn" → ✅ công cụ chỉ **ước lượng** độ lệch, không chỉnh đồng hồ.
+5. ❌ Dùng số dự đoán làm kết quả → ✅ chỉ số **đo thật** mới vào chương kết quả.
+
+## A8. Từ điển nhanh
+| Từ | Nghĩa |
+|---|---|
+| Offset | Đồng hồ lệch bao nhiêu (ở lab này = sai số) |
+| Delay | Thời gian gói đi + về |
+| Jitter | Độ "giật": trễ lúc nhiều lúc ít |
+| Loss | Mất gói |
+| Bất đối xứng | Chiều đi và chiều về mất thời gian khác nhau |
+| Namespace / veth | "Phòng" giả làm máy / "ống" giả làm cáp |
+| NetEm | Công cụ Linux làm mạng xấu |
+| Extension Field (EF) | Phần thông tin gắn thêm sau header |
+| Internet-Draft / RFC | Bản nháp tiêu chuẩn / tiêu chuẩn chính thức |
+| MAE / P95 | Sai số trung bình / 95% mẫu có sai số nhỏ hơn mức này |
+
+---
+
+# PHẦN B — CHI TIẾT
 
 ## Mục lục
 1. [Cách dùng file này](#1-cách-dùng-file-này)
