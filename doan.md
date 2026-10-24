@@ -15,6 +15,7 @@
 |---|---|
 | Chế độ | 4 mode: M1 v4 Basic · M2 v4 Interleaved · M3 v5 Basic · M4 v5 Interleaved |
 | Lab | 2 namespace như hiện tại (`ntp-c` 10.10.0.1 ↔ `ntp-s` 10.10.0.2) |
+| Công cụ | ntp5-exp commit **`fe19210`** — cả hai máy dùng đúng bản này (B-6) |
 | Kịch bản | S0 không trễ · S1 25/25 ms · S2 25±10 ms · S3 = S2 + mất 5% · S4 10/40 ms |
 | Số lượt | 4 × 5 × 5 = **100 run** |
 | Mỗi run | `-i 1` (2 s/lần), bỏ 60 s đầu, lấy 120 request → ~5 phút/run, **~9 giờ tổng** |
@@ -370,6 +371,7 @@ Công bằng: Era, TAI, độ phân giải ns **không thừa** nếu nhìn dài
 ## 6. Công cụ thực nghiệm ntp5-exp
 
 - Nguồn: https://github.com/mlichvar/ntp5-exp — clone tại `~/Desktop/ntp5-exp`.
+- **Phiên bản cố định của đồ án:** commit `fe19210790b2a1cbd951e3e5066dca094dd62a52` (23/09/2026, "set draft ID to draft-ietf-ntp-ntpv5-09+") — bản mới nhất trên GitHub tại 24/10/2026. **Cả hai máy phải dùng đúng commit này:** `git -C <thư mục ntp5-exp> checkout fe19210790b2a1cbd951e3e5066dca094dd62a52`. Không `git pull` cho tới khi xong đồ án.
 - File chính: `ntpnode.py` (Python, vừa làm client vừa làm server).
 
 ### 6.1 Đã kiểm tra (bằng grep/sed, 24/10/2026)
@@ -735,7 +737,7 @@ Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interlea
 | Q1 | Server lưu T3 cho Interleaved thế nào? | Đọc mã `master` | AI | ✅ dictionary 1000 mục; v4 xoá, v5 giữ (mục 6.1 #7b) — xác nhận lại trên đúng commit |
 | Q2 | Quy ước dấu offset? | Đọc mã | AI | ✅ server − client → S4 = −15 ms |
 | Q3 | Script có lọc mẫu không? | Đọc mã | AI | ✅ không lọc |
-| Q9 | Hash commit ntp5-exp nhóm dùng? | `git -C ~/Desktop/ntp5-exp rev-parse HEAD` | Tùng | ⬜ |
+| Q9 | Hash commit ntp5-exp nhóm dùng? | `git -C ~/Desktop/ntp5-exp rev-parse HEAD` | Tùng | ✅ `fe19210` — trùng bản mới nhất trên GitHub (23/09/2026) |
 | Q10 | Khi mất response, mẫu Interleaved ghép đúng T1/T4? | Đọc chỗ gán `prev_transmit_ts`, `prev_receive_ts` | Tuyến | ⬜ |
 | Q11 | Đã tắt VMware timesync + timesyncd? | `vmware-toolbox-cmd timesync status`; `timedatectl` | Tùng | ⬜ |
 | Q12 | NetEm trên Ubuntu 22.04 có hỗ trợ `seed`? | Thử lệnh | Tùng | ⬜ |
