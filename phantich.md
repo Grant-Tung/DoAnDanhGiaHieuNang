@@ -1,6 +1,27 @@
 # Context tổng hợp — Đồ án "Đánh giá hiệu năng NTPv5"
 
-> ⚠️ **ĐÍNH CHÍNH 24/10/2026 — ưu tiên hơn nội dung bên dưới.** Đọc thêm `doan.md` (sổ theo dõi chung, bản mới nhất) và `phanbien_nangcap.md` (phản biện phương pháp, có phân loại độ tin cậy).
+## ★ BÀN GIAO CHO AI MỚI — đọc phần này trước tiên
+
+**Bạn là AI tiếp nhận hỗ trợ đồ án này.** Làm theo thứ tự:
+
+1. **Đọc theo thứ tự:** (1) khối này → (2) `doan.md` Phần A, rồi mục 11 (tiến độ), 16 (câu hỏi mở), 19 (lịch sử) → (3) `phanbien_nangcap.md` mục 0 và 7 → (4) phần còn lại của file này khi cần chi tiết.
+2. **Thứ tự ưu tiên khi các file mâu thuẫn:** `doan.md` Phần B (mới nhất, đã đính chính) > khối đính chính bên dưới > `phanbien_nangcap.md` > phần thân file này (viết sớm hơn, có chỗ đã lỗi thời).
+3. **Người dùng:** Tùng (P2, mạng & thực nghiệm) và Tuyến (P1, giao thức & dữ liệu). **Chưa có nền mạng/đồng bộ thời gian** → tiếng Việt, đơn giản, ví dụ đời thường; lệnh phải copy-paste chạy được (Ubuntu 22.04 trong VMware, namespace `ntp-c`/`ntp-s`, server `10.10.0.2:10123`).
+4. **Quy tắc làm việc:**
+   - Không khẳng định hành vi `ntpnode.py` khi chưa xem mã trên **đúng commit** nhóm dùng; không khẳng định nội dung draft/RFC khi chưa đọc nguyên văn.
+   - Gắn nhãn độ tin cậy: [QS] đã quan sát · [MÃ] có trong mã · [TL] có trong tài liệu · [GT] giả thuyết · [CKC] chưa kiểm chứng.
+   - Không đưa số dự đoán vào phần kết quả.
+   - Mọi thay đổi: cập nhật `doan.md` (tiến độ mục 11, câu hỏi mục 16, lịch sử mục 19; sửa Phần A nếu ảnh hưởng). Ý tưởng/sửa phương pháp chưa được nhóm đồng ý → ghi vào `phanbien_nangcap.md`, **không** ghi vào `doan.md` như đã chốt.
+   - Nếu có kiến thức mới quan trọng cho AI sau → cập nhật khối bàn giao này.
+5. **Repo:** https://github.com/Grant-Tung/DoAnDanhGiaHieuNang (private). Nhánh `main` = bản thống nhất; `Tung`, `Tuyen` = nhánh cá nhân; gộp qua Pull Request.
+
+### Trạng thái hiện tại (cập nhật 24/10/2026)
+- ✅ Lab 2 namespace chạy được 3 mode; đã đọc mã `ntpnode.py` (nhánh master trên GitHub — **chưa xác nhận đúng commit của nhóm**).
+- ✅ Tuyến (P1) đã chạy 3 mode trên localhost, có `parse_log.py` → 241 mẫu (smoke test, không dùng để kết luận).
+- ⏳ Đang chờ nhóm chốt đề xuất trong `phanbien_nangcap.md`: 4 mode, kịch bản trễ trung bình 25 ms/chiều, 100 run, hướng nâng cao = chèn trễ xử lý phía server.
+- ⏭️ Việc kế tiếp: giai đoạn A trong `phanbien_nangcap.md` mục 7 (A1–A8).
+
+### Khối đính chính (ưu tiên hơn phần thân bên dưới)
 > - Công cụ ntp5-exp hạ về v4 khi **> 8 lượt mất liên tiếp** và nâng lại v5 ngay; **không có** cơ chế "chờ 256 request". Quy tắc "mất 2 → v4, chờ 256" của draft chưa đối chiếu nguyên văn.
 > - Man page tc-netem **không nói** jitter mặc định là phân phối đều → chưa kiểm chứng, phải đo.
 > - Dấu offset = server − client (mã nguồn) → S4 (10/40 ms) kỳ vọng **−15 ms**.
