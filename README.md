@@ -4,11 +4,30 @@ Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & d�
 
 ## Các file
 
-| File | Dành cho | Nội dung |
-|---|---|---|
-| `doan.md` | Cả nhóm | **Sổ theo dõi chính**: tổng quan, phân tích draft, kịch bản, tiến độ, nhật ký thí nghiệm, ý tưởng, chuẩn bị bảo vệ |
-| `phanbien_nangcap.md` | Cả nhóm | Phản biện phương pháp, kế hoạch A–E, tiêu chí nghiệm thu, câu hỏi trước khi chạy 100 run |
-| `phantich.md` | AI | Context để dán cho AI khác đọc |
+| File | Vai trò | Ai đọc | Khi nào sửa |
+|---|---|---|---|
+| `doan.md` | **Sổ theo dõi chính**. Phần A: đọc nhanh, dễ hiểu. Phần B: chi tiết chính xác để làm thí nghiệm và viết báo cáo | Tùng, Tuyến | Mỗi khi xong việc, chạy thí nghiệm, hoặc **chốt** một quyết định |
+| `phanbien_nangcap.md` | **Hộp góp ý**: ý tưởng, sửa phương pháp **chưa chốt** | Tùng, Tuyến, AI | Khi có góp ý mới; khi một đề xuất được chấp nhận/bác bỏ |
+| `phantich.md` | **Bàn giao cho AI**: đọc khối "BÀN GIAO" ở đầu file là AI mới làm tiếp được | AI | Khi trạng thái đồ án thay đổi đáng kể |
+
+## Vòng đời của một ý tưởng
+
+```
+Góp ý mới ──► phanbien_nangcap.md  (ghi: ⏳ chờ duyệt)
+                  │
+        Cả hai bàn, quyết định
+           │                 │
+     ✅ Chấp nhận        ❌ Bác bỏ
+           │                 │
+  Chuyển vào doan.md    Giữ trong phanbien, ghi lý do
+  (Phần B + Phần A nếu cần, ghi mục 19)
+           │
+  Cập nhật khối "Trạng thái hiện tại" trong phantich.md
+```
+
+## Khi dùng AI
+- Mở cuộc trò chuyện mới → dán (hoặc đính kèm) `phantich.md` + `doan.md` → nói: *"Đọc khối BÀN GIAO trong phantich.md rồi tiếp tục việc tiếp theo."*
+- Xong buổi làm việc → nhắc AI: *"Cập nhật doan.md (tiến độ, lịch sử) và khối Trạng thái hiện tại trong phantich.md."* → commit + push.
 
 ## Cách làm việc với 2 nhánh
 
