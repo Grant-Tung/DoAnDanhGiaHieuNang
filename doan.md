@@ -647,6 +647,7 @@ runs/<pilot|main>/
 - Warm-up: dòng có `epoch − epoch dòng đầu tiên < 60` → `in_warmup = true` (không xoá).
 - Đếm request phải dùng dòng `Sent NTPv` trong `client.log`, không dùng PCAP (gói mất ở chiều đi không có trong PCAP).
 - Thư mục `<run_id>.loi.<số>` = lần chạy lỗi, giữ lại để truy vết.
+- ⚠️ Máy Tùng dùng locale số tiếng Việt (dấu phẩy thập phân): `awk`/`printf`/`sort -n` trong shell đọc sai `+0.000057` thành 0. **Luôn thêm `LC_ALL=C`** trước các lệnh này. Python không bị ảnh hưởng.
 
 ### 10.2 KPI
 - MAE và P95 của |offset|
@@ -701,6 +702,7 @@ runs/<pilot|main>/
 | 24/10/2026 | ping-01 | S0–S4 | ping 100 gói/KB, `-i 0.2` | ~2 phút | Tùng | S0 0,076 ms · S1 50,58 ms · S2 35,2/50,3/66,6 sd 7,6 · S3 mất 16%, 34,1/50,1/68,5 · S4 50,56 ms | Đạt. S3 mất 16% (kỳ vọng ~10%) → đo lại 500 gói. File `checks/ping_all.txt` trên máy Tùng |
 | 24/10/2026 | ping-02 | S3 | ping 500 gói | ~100 s | Tùng | mất **10,2%**; RTT 31,6/50,5/69,6, sd 8,3 | Đạt (lý thuyết 9,75%). `checks/ping_S3_500.txt` |
 | 24/10/2026 | mode-01 | S0 | M1–M4, `-i 1`, 40 s/mode | ~3 phút | Tùng | Mỗi mode 20 mẫu; `-v 4 -x` và `-v 5 -x` có 19 Interleaved (mẫu đầu Basic) | **M2 chạy được.** Quan sát: S0 offset ±0,04–0,38 ms, delay 0,38–1,7 ms → nhiễu nền (VM + Python) lớn hơn dự đoán "vài chục µs"; theo dõi trong 100 run. `checks/mode_*.log` |
+| 24/10/2026 | pilot | S0, S4 | M1–M4 × 1 lặp, runner | 14:13–14:54 | Tùng | 8/8 ok; 149 mẫu/run (119 sau warm-up); M2/M4: 148 Interleaved; sent = recv = 149 | Runner chạy đúng. Kiểm tra lệch S4 ≈ −15 ms: lần đầu ra 0 do lỗi locale `awk` → chạy lại với `LC_ALL=C` |
 | | | | | | | | |
 
 ---
