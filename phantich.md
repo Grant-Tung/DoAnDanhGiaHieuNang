@@ -18,8 +18,10 @@
 ### Trạng thái hiện tại (cập nhật 24/10/2026)
 - ✅ Lab 2 namespace chạy được 3 mode; đã đọc mã `ntpnode.py` (nhánh master trên GitHub — **chưa xác nhận đúng commit của nhóm**).
 - ✅ Tuyến (P1) đã chạy 3 mode trên localhost, có `parse_log.py` → 241 mẫu (smoke test, không dùng để kết luận).
-- ⏳ Đang chờ nhóm chốt đề xuất trong `phanbien_nangcap.md`: 4 mode, kịch bản trễ trung bình 25 ms/chiều, 100 run, hướng nâng cao = chèn trễ xử lý phía server.
-- ⏭️ Việc kế tiếp: giai đoạn A trong `phanbien_nangcap.md` mục 7 (A1–A8).
+- 🔒 **PHẠM VI ĐÃ ĐÓNG BĂNG (24/10/2026)** — xem `doan.md` mục A0. Tóm tắt: 4 mode (M1 v4 Basic, M2 v4 Interleaved, M3 v5 Basic, M4 v5 Interleaved); S0 không trễ, S1 25/25, S2 25±10, S3 = S2 + loss 5%, S4 10/40 ms; 100 run; `-i 1`, bỏ 60 s, 120 request/run; 4 RQ; thống kê đơn giản (run là đơn vị, trung bình + khoảng dao động). Tuỳ chọn duy nhất: chèn trễ xử lý phía server, sau khi xong 100 run.
+- ⛔ **AI KHÔNG được đề xuất mở rộng phạm vi** (máy thật, S5, kiểm định nâng cao, kịch bản mới, rà soát thêm). Nếu người dùng tự nêu ý tưởng mới → ghi vào `phanbien_nangcap.md` nhãn "sau đồ án". Chỉ đề xuất đổi bảng A0 khi số liệu pilot chứng minh không chạy được.
+- ⏳ Còn chờ duy nhất: tên đề tài (hỏi GVHD).
+- ⏭️ Việc kế tiếp: 7 bước trong `doan.md` mục A6 (bước 1 Tùng: tắt timesync, lấy commit, `config_scenario.sh`, ping; bước 2 Tuyến: chạy thử `-v 4 -x`, sửa `parse_log.py`). Vai trò của AI giờ là **hỗ trợ thực thi** (viết script, đọc log, gỡ lỗi), không thiết kế lại.
 
 ### Khối đính chính (ưu tiên hơn phần thân bên dưới)
 > - Công cụ ntp5-exp hạ về v4 khi **> 8 lượt mất liên tiếp** và nâng lại v5 ngay; **không có** cơ chế "chờ 256 request". Quy tắc "mất 2 → v4, chờ 256" của draft chưa đối chiếu nguyên văn.
@@ -27,7 +29,7 @@
 > - Dấu offset = server − client (mã nguồn) → S4 (10/40 ms) kỳ vọng **−15 ms**.
 > - NTPv4 Interleaved là **RFC 9769** (Lichvar & Malhotra, 2025, Proposed Standard); công cụ hỗ trợ `-v 4 -x`.
 > - Server lưu T3 trong 1 dictionary ≤ 1000 mục; **v4 xoá mục sau khi dùng, v5 giữ lại**. Công cụ **không lọc mẫu**.
-> - Đề xuất đang xét (chưa chốt): 4 mode (M1 v4 Basic, M2 v4 Interleaved, M3 v5 Basic, M4 v5 Interleaved); mọi kịch bản trễ trung bình 25 ms/chiều; 100 run; hướng nâng cao duy nhất = chèn trễ xử lý phía server.
+> - ✅ Đã chốt (24/10): 4 mode; mọi kịch bản trễ trung bình 25 ms/chiều; 100 run. Các kịch bản S0–S4 và lệnh trong phần thân file này là **bản cũ** (10/10, 20±10, 3 mode, 75 run) → dùng bản trong `doan.md` mục 8.1 và 18.
 
 > File này là nguồn context duy nhất cho AI hỗ trợ đồ án. Gộp từ: (a) `ntpv5_project_context-v7.md` (tiến độ, môi trường, kế hoạch), (b) phân tích draft-ietf-ntp-ntpv5-09 (đọc trực tiếp tại https://www.ietf.org/archive/id/draft-ietf-ntp-ntpv5-09.txt). Các chỗ (a) và (b) mâu thuẫn đã được đính chính ở mục 3.
 

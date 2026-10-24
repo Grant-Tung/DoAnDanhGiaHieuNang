@@ -7,16 +7,19 @@
 
 | Mã | Đề xuất | Người đề xuất | Ngày | Chi tiết | Trạng thái | Ghi chú quyết định |
 |---|---|---|---|---|---|---|
-| D1 | Đổi tên đề tài: "…ước lượng độ lệch thời gian của NTPv4 và NTPv5 ở chế độ Basic và Interleaved…" | Nhóm + AI | 24/10 | mục 1.1 | ⏳ | Cần hỏi GVHD |
-| D2 | 4 mode (thêm M2 = NTPv4 Interleaved `-v 4 -x`) | Nhóm | 24/10 | mục 2.1 | ⏳ | |
-| D3 | Mọi kịch bản trễ trung bình 25 ms/chiều; S3 = S2 + loss 5%; S4 = 10/40 | Nhóm + AI | 24/10 | mục 2.2 | ⏳ | |
-| D4 | 100 run (4 × 5 × 5), ≥ 100 request/run, poll `-i 1`, khởi động lại server mỗi run, xáo trộn theo khối | Nhóm + AI | 24/10 | mục 2.3 | ⏳ | |
-| D5 | Dữ liệu 2 tầng (raw sample + run metadata) với các cột bổ sung | Nhóm + AI | 24/10 | mục 4 | ⏳ | |
-| D6 | Thống kê: run là đơn vị; kiểm định hoán vị; kiểm định tương đương với Δ chốt sau pilot | AI | 24/10 | mục 5 | ⏳ | |
-| D7 | Hướng nâng cao duy nhất: chèn trễ xử lý phía server | Nhóm + AI | 24/10 | mục 6 | ⏳ | |
-| D8 | Bỏ S5c (hạ phiên bản) khỏi hướng nâng cao | AI | 24/10 | mục 3 #3 | ⏳ | |
-| D9 | Tắt VMware timesync + timesyncd trước mọi run | AI | 24/10 | mục 2.4 | ⏳ | Nên chấp nhận ngay |
-| D10 | Kịch bản máy thật (Wi-Fi, HW timestamp) — chỉ sau ma trận chính | AI | 24/10 | `doan.md` B-8.3 | ⏳ | Tuỳ chọn |
+| D1 | Đổi tên đề tài: "…ước lượng độ lệch thời gian của NTPv4 và NTPv5 ở chế độ Basic và Interleaved…" | Nhóm + AI | 24/10 | mục 1.1 | ⏳ | Việc duy nhất còn chờ — hỏi GVHD |
+| D2 | 4 mode (thêm M2 = NTPv4 Interleaved `-v 4 -x`) | Nhóm | 24/10 | mục 2.1 | ✅ 24/10 | Chạy thử để xác nhận `-v 4 -x` ra dòng `Interleaved mode` |
+| D3 | Mọi kịch bản trễ trung bình 25 ms/chiều; S3 = S2 + loss 5%; S4 = 10/40 | Nhóm + AI | 24/10 | mục 2.2 | ✅ 24/10 | S0 vẫn không thêm trễ |
+| D4 | 100 run (4 × 5 × 5), khởi động lại server mỗi run | Nhóm + AI | 24/10 | mục 2.3 | ✅ 24/10 | Chốt luôn: `-i 1`, bỏ 60 s đầu, 120 request/run (~5 phút/run, ~9 giờ tổng). Chỉ đổi nếu pilot lỗi |
+| D5 | Lưu log gốc + metadata mỗi run + cột chế độ yêu cầu/thực tế | Nhóm + AI | 24/10 | mục 4 | ✅ 24/10 | Áp dụng ngay |
+| D6 | Thống kê: kiểm định hoán vị, kiểm định tương đương | AI | 24/10 | mục 5 | ❌ rút gọn | Chỉ dùng: run là đơn vị, trung bình + khoảng dao động qua 5 lần lặp. Kiểm định nâng cao → "hướng phát triển" |
+| D7 | Chèn trễ xử lý phía server | Nhóm + AI | 24/10 | mục 6 | 🟡 tuỳ chọn | Chỉ làm sau khi xong 100 run và có biểu đồ chính |
+| D8 | Bỏ S5c (hạ phiên bản) | AI | 24/10 | mục 3 #3 | ✅ 24/10 | |
+| D9 | Tắt VMware timesync + timesyncd trước mọi run | AI | 24/10 | mục 2.4 | ✅ 24/10 | |
+| D10 | Kịch bản máy thật (Wi-Fi, HW timestamp, 2 đồng hồ) | AI | 24/10 | `doan.md` B-8.3 | ❌ | → "Hướng phát triển" (Ch.5) |
+| D11 | **Đóng băng phạm vi** | Nhóm | 24/10 | `doan.md` A0 | ✅ 24/10 | Ý tưởng mới chỉ ghi nhãn "sau đồ án"; chỉ mở lại quyết định khi pilot chứng minh không chạy được |
+
+> **24/10/2026 — Phạm vi đã đóng băng.** Không thêm vòng rà soát nào cho tới khi có số liệu pilot. Góp ý mới vẫn ghi vào bảng nhưng mặc định trạng thái **"sau đồ án"**.
 
 ---
 
