@@ -16,7 +16,7 @@
 5. **Repo:** https://github.com/Grant-Tung/DoAnDanhGiaHieuNang (private). Nhánh `main` = bản thống nhất; `Tung`, `Tuyen` = nhánh cá nhân; gộp qua Pull Request.
 
 ### Trạng thái hiện tại (cập nhật 24/10/2026)
-- ✅ Lab 2 namespace chạy được 3 mode; đã đọc mã `ntpnode.py` (nhánh master trên GitHub — **chưa xác nhận đúng commit của nhóm**).
+- ✅ Lab 2 namespace chạy được 3 mode; đã đọc mã `ntpnode.py`. Commit nhóm dùng: **`fe19210790b2a1cbd951e3e5066dca094dd62a52`** = bản mới nhất nhánh `main` trên GitHub (đã so bằng GitHub API 24/10). Khi có mâu thuẫn giữa bản tóm tắt mã và output `sed` trên máy nhóm, **tin output trên máy** (ví dụ: `transmit_ts` được đọc trước `encode()`).
 - ✅ Tuyến (P1) đã chạy 3 mode trên localhost, có `parse_log.py` → 241 mẫu (smoke test, không dùng để kết luận).
 - 🔒 **PHẠM VI ĐÃ ĐÓNG BĂNG (24/10/2026)** — xem `doan.md` mục A0. Tóm tắt: 4 mode (M1 v4 Basic, M2 v4 Interleaved, M3 v5 Basic, M4 v5 Interleaved); S0 không trễ, S1 25/25, S2 25±10, S3 = S2 + loss 5%, S4 10/40 ms; 100 run; `-i 1`, bỏ 60 s, 120 request/run; 4 RQ; thống kê đơn giản (run là đơn vị, trung bình + khoảng dao động). Tuỳ chọn duy nhất: chèn trễ xử lý phía server, sau khi xong 100 run.
 - ⛔ **AI KHÔNG được đề xuất mở rộng phạm vi** (máy thật, S5, kiểm định nâng cao, kịch bản mới, rà soát thêm). Nếu người dùng tự nêu ý tưởng mới → ghi vào `phanbien_nangcap.md` nhãn "sau đồ án". Chỉ đề xuất đổi bảng A0 khi số liệu pilot chứng minh không chạy được.
