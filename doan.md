@@ -79,9 +79,9 @@ S1–S4 cùng tổng trễ trung bình 50 ms → mỗi cặp chỉ khác **một
 
 | Bước | Việc | Ai | Xong khi |
 |---|---|---|---|
-| 1 | Tắt đồng bộ giờ VMware + Ubuntu; lấy mã commit; viết `config_scenario.sh` (B-8.1); ping kiểm tra S0–S4 | Tùng | Ping khớp bảng B-8.1 |
-| 2 | Chạy thử `-v 4 -x`; sửa `parse_log.py` (cột yêu cầu/thực tế, đếm Sent/Received/mẫu hợp lệ) | Tuyến | Thấy `Interleaved mode` ở v4; ra đúng CSV |
-| 3 | Viết runner; pilot 4 mode × {S0, S4} × 1 lượt | Tùng | S4 lệch ≈ −15 ms, không lỗi |
+| 1 | ✅ Tắt đồng bộ giờ VMware + Ubuntu; lấy mã commit; viết `config_scenario.sh` (B-8.1); ping kiểm tra S0–S4 | Tùng | Ping khớp bảng B-8.1 |
+| 2 | ✅ Chạy thử `-v 4 -x` (Tùng, 24/10); ⬜ sửa `parse_log.py` theo định dạng runner (B-10.1) | Tuyến | Ra đúng CSV từ thư mục `runs/pilot/` |
+| 3 | 🔄 Runner `scripts/run_matrix.sh` đã viết; pilot 4 mode × {S0, S4} × 1 lượt | Tùng | 8 run "ok"; S4 lệch ≈ −15 ms |
 | 4 | Chạy 100 run (để qua đêm) | Tùng | Đủ 100 dòng metadata |
 | 5 | Tính chỉ số, vẽ 4–5 biểu đồ | Tuyến | Có biểu đồ chính |
 | 6 | Viết: Tuyến Ch.2 + Ch.4; Tùng Ch.3 | Cả hai | Bản nháp đủ |
@@ -632,6 +632,22 @@ Cách tính:
 
 Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interleaved đầu).
 
+**Định dạng output của runner `scripts/run_matrix.sh` (Tuyến viết `parse_log.py` theo đây):**
+```
+runs/<pilot|main>/
+├── plan.csv          # run_id,block,order,rep,scenario,mode (thứ tự đã xáo trộn)
+├── metadata.csv      # 1 dòng/run: ... requests_sent, responses_received, valid_samples, interleaved_samples, status
+└── <run_id>/         # ví dụ main-b2-07_S3_M4
+    ├── client.log    # MỖI DÒNG có thời gian epoch ở đầu: "1761300000.123456   Basic mode offset=+0.000057 delay=..."
+    ├── server.log
+    ├── capture.pcap  # bắt trên veth-c (chỉ thấy gói đã qua NetEm; gói bị NetEm vứt không có trong PCAP)
+    ├── tc_before.txt
+    └── tc_after.txt  # thống kê NetEm 2 chiều (sent / dropped) → loss quan sát được
+```
+- Warm-up: dòng có `epoch − epoch dòng đầu tiên < 60` → `in_warmup = true` (không xoá).
+- Đếm request phải dùng dòng `Sent NTPv` trong `client.log`, không dùng PCAP (gói mất ở chiều đi không có trong PCAP).
+- Thư mục `<run_id>.loi.<số>` = lần chạy lỗi, giữ lại để truy vết.
+
 ### 10.2 KPI
 - MAE và P95 của |offset|
 - Trung bình, độ lệch chuẩn của delay
@@ -683,6 +699,8 @@ Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interlea
 | 24/10/2026 | thử-01 | S0 | v5 Basic | vài lượt | Tùng | offset +57 µs, delay 493 µs | Mẫu đầu tiên, chưa chạy runner |
 | 24/10/2026 | thử-02 | S0 | v5 Basic `-f 8` | vài lượt | Tùng | gói 148 B | Kiểm chứng phân rã 180 B |
 | 24/10/2026 | ping-01 | S0–S4 | ping 100 gói/KB, `-i 0.2` | ~2 phút | Tùng | S0 0,076 ms · S1 50,58 ms · S2 35,2/50,3/66,6 sd 7,6 · S3 mất 16%, 34,1/50,1/68,5 · S4 50,56 ms | Đạt. S3 mất 16% (kỳ vọng ~10%) → đo lại 500 gói. File `checks/ping_all.txt` trên máy Tùng |
+| 24/10/2026 | ping-02 | S3 | ping 500 gói | ~100 s | Tùng | mất **10,2%**; RTT 31,6/50,5/69,6, sd 8,3 | Đạt (lý thuyết 9,75%). `checks/ping_S3_500.txt` |
+| 24/10/2026 | mode-01 | S0 | M1–M4, `-i 1`, 40 s/mode | ~3 phút | Tùng | Mỗi mode 20 mẫu; `-v 4 -x` và `-v 5 -x` có 19 Interleaved (mẫu đầu Basic) | **M2 chạy được.** Quan sát: S0 offset ±0,04–0,38 ms, delay 0,38–1,7 ms → nhiễu nền (VM + Python) lớn hơn dự đoán "vài chục µs"; theo dõi trong 100 run. `checks/mode_*.log` |
 | | | | | | | | |
 
 ---
@@ -833,3 +851,4 @@ Lỗi thường gặp:
 | 24/10/2026 | Tùng (+AI) | Phản biện theo tài liệu góp ý của nhóm → tạo `phanbien_nangcap.md`. Đính chính: RFC 9769 (NTPv4 Interleaved), hành vi thương lượng của công cụ (> 8 lượt mất, không có 256), jitter mặc định chưa kiểm chứng, dấu S4 = −15 ms, cách server lưu T3 (v4 xoá / v5 giữ). Hạ ưu tiên S5c; hướng nâng cao chọn: chèn trễ xử lý phía server |
 | 24/10/2026 | Tùng (+AI) | Thêm Phần A (đọc nhanh) |
 | 24/10/2026 | Tùng + Tuyến | **🔒 Chốt phạm vi (A0):** 4 mode, S1–S4 trễ trung bình 25 ms/chiều, 100 run, `-i 1` + bỏ 60 s + 120 request/run, 4 RQ, thống kê đơn giản; máy thật/S5/kiểm định nâng cao → hướng phát triển. Sửa script 8.1, bảng ping, dự đoán mục 9, tiến độ, kho ý tưởng, cheat sheet |
+| 24/10/2026 | Tùng (+AI) | T10–T11 xong; M2 xác nhận chạy được; thêm `scripts/config_scenario.sh`, `scripts/run_matrix.sh`, định dạng output runner (B-10.1) |
