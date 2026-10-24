@@ -486,7 +486,7 @@ Kiểm tra code (6.1 #1, #5): chỉ dùng `time.time()`, ghi giờ **trước** 
 | S4 | delay 10ms | delay 40ms | Bất đối xứng (so với S1, cùng tổng 50 ms) |
 
 Ma trận chính (T18): 5 kịch bản × **4 chế độ** × 5 lần lặp = **100 run** (✅ chốt 24/10).
-❓ Phân phối jitter khi không khai `distribution`: man page tc-netem **không nói** → phải đo (1000 ping, vẽ histogram) và ghi phân phối quan sát được vào Ch.3.
+Phân phối jitter khi không khai `distribution`: man page tc-netem không nói. **Đo thực tế (ping-01, 24/10) [QS]:** S2 cho RTT 35,2–66,6 ms, độ lệch chuẩn 7,6 ms. Lý thuyết với phân phối đều ±10 ms mỗi chiều là 8,2 ms và RTT bị chặn trong 30–70 ms; với phân phối chuẩn σ = 10 ms là ~14 ms và không bị chặn → **khớp phân phối đều**. Ghi vào Ch.3 kèm số đo.
 
 > ✅ **Đã chốt 24/10/2026** (xem A0 và `phanbien_nangcap.md` D2–D4).
 
@@ -660,8 +660,8 @@ Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interlea
 | T07–T08 | Schema CSV, `export_logs.py` | Tuyến | ❓ | Xem mục 10.1 |
 | T09 | Chạy được 3 chế độ | Tùng | ✅ | Server cần `-l` |
 | — | Kiểm tra mã `ntpnode.py` | Tùng | ✅ 24/10 | Mục 6 |
-| T10 | `config_scenario.sh` | Tùng | ⏭️ | Mục 8.1 |
-| T11 | Kiểm chứng qdisc + ping S1–S4 | Tùng | ⬜ | Bảng ở mục 8.1 |
+| T10 | `config_scenario.sh` | Tùng | ✅ 24/10 | Bản 25 ms, mục 8.1 |
+| T11 | Kiểm chứng qdisc + ping S0–S4 | Tùng | ✅ 24/10 | Đạt (ping-01); S3 đo lại 500 gói |
 | T12–T14 | Pipeline phân tích | Tuyến | ⬜ | |
 | T15–T17 | Runner + pilot (S0, S4) | Tùng | ⬜ | |
 | T18 | Ma trận chính 100 run (4 mode × 5 KB × 5 lặp) | Tùng | ⬜ | `-i 1`, bỏ 60 s, 120 request/run |
@@ -682,6 +682,7 @@ Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interlea
 |---|---|---|---|---|---|---|---|
 | 24/10/2026 | thử-01 | S0 | v5 Basic | vài lượt | Tùng | offset +57 µs, delay 493 µs | Mẫu đầu tiên, chưa chạy runner |
 | 24/10/2026 | thử-02 | S0 | v5 Basic `-f 8` | vài lượt | Tùng | gói 148 B | Kiểm chứng phân rã 180 B |
+| 24/10/2026 | ping-01 | S0–S4 | ping 100 gói/KB, `-i 0.2` | ~2 phút | Tùng | S0 0,076 ms · S1 50,58 ms · S2 35,2/50,3/66,6 sd 7,6 · S3 mất 16%, 34,1/50,1/68,5 · S4 50,56 ms | Đạt. S3 mất 16% (kỳ vọng ~10%) → đo lại 500 gói. File `checks/ping_all.txt` trên máy Tùng |
 | | | | | | | | |
 
 ---
