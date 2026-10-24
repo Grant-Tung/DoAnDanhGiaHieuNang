@@ -16,12 +16,14 @@
 5. **Repo:** https://github.com/Grant-Tung/DoAnDanhGiaHieuNang (private). Nhánh `main` = bản thống nhất; `Tung`, `Tuyen` = nhánh cá nhân; gộp qua Pull Request.
 
 ### Trạng thái hiện tại (cập nhật 24/10/2026)
-- ✅ Lab 2 namespace chạy được 3 mode; đã đọc mã `ntpnode.py` (nhánh master trên GitHub — **chưa xác nhận đúng commit của nhóm**).
+- ✅ Lab 2 namespace chạy được 3 mode; đã đọc mã `ntpnode.py`. Commit nhóm dùng: **`fe19210790b2a1cbd951e3e5066dca094dd62a52`** = bản mới nhất nhánh `main` trên GitHub (đã so bằng GitHub API 24/10). Khi có mâu thuẫn giữa bản tóm tắt mã và output `sed` trên máy nhóm, **tin output trên máy** (ví dụ: `transmit_ts` được đọc trước `encode()`).
 - ✅ Tuyến (P1) đã chạy 3 mode trên localhost, có `parse_log.py` → 241 mẫu (smoke test, không dùng để kết luận).
 - 🔒 **PHẠM VI ĐÃ ĐÓNG BĂNG (24/10/2026)** — xem `doan.md` mục A0. Tóm tắt: 4 mode (M1 v4 Basic, M2 v4 Interleaved, M3 v5 Basic, M4 v5 Interleaved); S0 không trễ, S1 25/25, S2 25±10, S3 = S2 + loss 5%, S4 10/40 ms; 100 run; `-i 1`, bỏ 60 s, 120 request/run; 4 RQ; thống kê đơn giản (run là đơn vị, trung bình + khoảng dao động). Tuỳ chọn duy nhất: chèn trễ xử lý phía server, sau khi xong 100 run.
 - ⛔ **AI KHÔNG được đề xuất mở rộng phạm vi** (máy thật, S5, kiểm định nâng cao, kịch bản mới, rà soát thêm). Nếu người dùng tự nêu ý tưởng mới → ghi vào `phanbien_nangcap.md` nhãn "sau đồ án". Chỉ đề xuất đổi bảng A0 khi số liệu pilot chứng minh không chạy được.
 - ⏳ Còn chờ duy nhất: tên đề tài (hỏi GVHD).
-- ⏭️ Việc kế tiếp: 7 bước trong `doan.md` mục A6 (bước 1 Tùng: tắt timesync, lấy commit, `config_scenario.sh`, ping; bước 2 Tuyến: chạy thử `-v 4 -x`, sửa `parse_log.py`). Vai trò của AI giờ là **hỗ trợ thực thi** (viết script, đọc log, gỡ lỗi), không thiết kế lại.
+- ✅ (24/10) Bước 1–3 trong `doan.md` A6 xong: NetEm kiểm chứng bằng ping (jitter phân phối đều), 4 mode chạy được, runner `scripts/run_matrix.sh` + pilot 8/8 ok, S4 lệch −15,0 ms đúng lý thuyết.
+- ⏭️ Việc kế tiếp: Tùng chạy `sudo ./run_matrix.sh main` (100 run, ~8 giờ 40); Tuyến viết `parse_log.py` theo định dạng ở `doan.md` B-10.1 (thử trên dữ liệu `runs/pilot`). Vai trò của AI giờ là **hỗ trợ thực thi** (viết script, đọc log, gỡ lỗi), không thiết kế lại.
+- ⚠️ Máy Tùng dùng locale dấu phẩy thập phân → mọi lệnh `awk`/`printf` trong shell phải có `LC_ALL=C`.
 
 ### Khối đính chính (ưu tiên hơn phần thân bên dưới)
 > - Công cụ ntp5-exp hạ về v4 khi **> 8 lượt mất liên tiếp** và nâng lại v5 ngay; **không có** cơ chế "chờ 256 request". Quy tắc "mất 2 → v4, chờ 256" của draft chưa đối chiếu nguyên văn.
