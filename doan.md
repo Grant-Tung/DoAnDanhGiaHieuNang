@@ -864,3 +864,4 @@ Lỗi thường gặp:
 | 24/10/2026 | Tùng + Tuyến | **🔒 Chốt phạm vi (A0):** 4 mode, S1–S4 trễ trung bình 25 ms/chiều, 100 run, `-i 1` + bỏ 60 s + 120 request/run, 4 RQ, thống kê đơn giản; máy thật/S5/kiểm định nâng cao → hướng phát triển. Sửa script 8.1, bảng ping, dự đoán mục 9, tiến độ, kho ý tưởng, cheat sheet |
 | 24/10/2026 | Tùng (+AI) | T10–T11 xong; M2 xác nhận chạy được; thêm `scripts/config_scenario.sh`, `scripts/run_matrix.sh`, định dạng output runner (B-10.1) |
 | 24/10/2026 | Tùng (+AI) | Pilot đạt (S4 −15,0 ms, 8/8 ok); T15–T17 ✅; cheat sheet thêm lệnh runner + kiểm tra nhanh |
+| 24/10/2026 | Tùng (+AI) | Thêm `hoc_doan.md` (bản đồ học 12 bài + prompt gia sư). Đóng phiên AI: việc dở dang ghi ở `phantich.md` khối bàn giao (chạy 100 run, gửi pilot cho Tuyến, mời Tuyến vào repo, parse_log.py, tên đề tài) |
