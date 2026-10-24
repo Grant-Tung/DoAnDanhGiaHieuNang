@@ -9,6 +9,8 @@ Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & d�
 | `doan.md` | **Sổ theo dõi chính**. Phần A: đọc nhanh, dễ hiểu. Phần B: chi tiết chính xác để làm thí nghiệm và viết báo cáo | Tùng, Tuyến | Mỗi khi xong việc, chạy thí nghiệm, hoặc **chốt** một quyết định |
 | `phanbien_nangcap.md` | **Hộp góp ý**: ý tưởng, sửa phương pháp **chưa chốt** | Tùng, Tuyến, AI | Khi có góp ý mới; khi một đề xuất được chấp nhận/bác bỏ |
 | `phantich.md` | **Bàn giao cho AI**: đọc khối "BÀN GIAO" ở đầu file là AI mới làm tiếp được | AI | Khi trạng thái đồ án thay đổi đáng kể |
+| `hoc_doan.md` | **Học đồ án**: bản đồ 12 bài + prompt cho AI gia sư | Tùng, Tuyến | Khi phạm vi/kết quả đồ án thay đổi |
+| `scripts/` | `config_scenario.sh` (5 kịch bản NetEm), `run_matrix.sh` (chạy pilot/100 run) | Tùng | Khi sửa script trên máy ảo |
 
 ## Vòng đời của một ý tưởng
 
