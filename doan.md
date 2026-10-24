@@ -9,6 +9,25 @@
 
 # PHẦN A — ĐỌC NHANH
 
+## A0. 🔒 PHẠM VI ĐÃ CHỐT (24/10/2026) — làm theo đúng bảng này
+
+| Hạng mục | Chốt |
+|---|---|
+| Chế độ | 4 mode: M1 v4 Basic · M2 v4 Interleaved · M3 v5 Basic · M4 v5 Interleaved |
+| Lab | 2 namespace như hiện tại (`ntp-c` 10.10.0.1 ↔ `ntp-s` 10.10.0.2) |
+| Kịch bản | S0 không trễ · S1 25/25 ms · S2 25±10 ms · S3 = S2 + mất 5% · S4 10/40 ms |
+| Số lượt | 4 × 5 × 5 = **100 run** |
+| Mỗi run | `-i 1` (2 s/lần), bỏ 60 s đầu, lấy 120 request → ~5 phút/run, **~9 giờ tổng** |
+| Trước mỗi đợt chạy | Tắt đồng bộ giờ VMware + Ubuntu; khởi động lại server mỗi run |
+| Dữ liệu | Log gốc + 1 dòng metadata/run + cột chế độ yêu cầu/thực tế |
+| Chỉ số | Lệch trung bình (có dấu), MAE, P95, tỷ lệ mẫu hợp lệ, tỷ lệ Interleaved thực tế, byte |
+| Thống kê | Trung bình + khoảng dao động qua 5 lần lặp (mỗi run = 1 điểm) |
+| Tuỳ chọn | Chèn trễ xử lý phía server — **chỉ** sau khi xong 100 run + có biểu đồ chính |
+| Không làm | Máy thật, S5a/b/c, Bloom filter, Correction field, NTS, kiểm định nâng cao → ghi vào "Hướng phát triển" Ch.5 |
+| Còn chờ | Tên đề tài (hỏi GVHD) |
+
+**Quy tắc:** ý tưởng mới → ghi `phanbien_nangcap.md` nhãn "sau đồ án", không bàn lại. Chỉ đổi bảng trên khi pilot chứng minh không chạy được. Chưa kết luận "v5 tốt hơn" hay "Interleaved tốt hơn" — chỉ viết theo số đo.
+
 ## A1. Đồ án làm gì (3 câu)
 - Đồng hồ máy tính chạy lệch dần. **NTP** là cách máy tính hỏi giờ một máy chuẩn qua mạng để biết mình lệch bao nhiêu.
 - **NTPv4** đang dùng khắp nơi. **NTPv5** là bản mới, đang ở dạng **bản nháp** (chưa thành chuẩn chính thức) do người viết phần mềm chrony soạn.
@@ -30,7 +49,7 @@
 | Mã | Tên | Hiểu đơn giản |
 |---|---|---|
 | M1 | NTPv4 Basic | Bản cũ, hỏi giờ bình thường |
-| M2 | NTPv4 Interleaved | Bản cũ, server báo "giờ gửi chính xác của lần trước" *(đề xuất thêm, chưa chốt)* |
+| M2 | NTPv4 Interleaved | Bản cũ, server báo "giờ gửi chính xác của lần trước" |
 | M3 | NTPv5 Basic | Bản mới, hỏi giờ bình thường |
 | M4 | NTPv5 Interleaved | Bản mới, kiểu "báo giờ lần trước" |
 
@@ -40,10 +59,12 @@
 | KB | Mạng | Để trả lời |
 |---|---|---|
 | S0 | Hoàn hảo | Mốc chuẩn |
-| S1 | Chậm đều 2 chiều | Chậm đều có gây sai không? |
-| S2 | Chậm + giật | Giật lag thì sao? |
+| S1 | Chậm đều 25 ms mỗi chiều | Chậm đều có gây sai không? |
+| S2 | 25 ms, giật ±10 ms | Giật lag thì sao? |
 | S3 | Như S2 + mất 5% gói | Mất gói thì sao? |
-| S4 | Đi nhanh, về chậm | "Điểm mù" của mọi NTP |
+| S4 | Đi 10 ms, về 40 ms (tổng vẫn 50 như S1) | "Điểm mù" của mọi NTP |
+
+S1–S4 cùng tổng trễ trung bình 50 ms → mỗi cặp chỉ khác **một** yếu tố (S2−S1: giật; S3−S2: mất gói; S4−S1: bất đối xứng).
 
 ## A5. Dự đoán kết quả (chưa đo — chỉ để đối chiếu)
 - **v4 và v5 gần như bằng nhau** — vì công thức tính giờ giống hệt.
@@ -53,11 +74,19 @@
 - **Kết luận dự kiến:** NTPv5 tiến bộ về *thiết kế và bảo mật*, không phải về *độ chính xác*. Kết quả "không thắng" vẫn là kết quả tốt nếu đo đúng và giải thích được.
 
 ## A6. Đang ở đâu & làm gì tiếp
-- ✅ Dựng lab, chạy được 3 chế độ, đọc xong mã `ntpnode.py`.
-- ⏭️ **Tùng:** lấy mã commit (`git -C ~/Desktop/ntp5-exp rev-parse HEAD`), tắt đồng bộ giờ của VMware/Ubuntu, viết script mạng xấu, ping kiểm tra.
-- ⏭️ **Tuyến:** chạy thử `-v 4 -x`, sửa `parse_log.py` (thêm cột chế độ yêu cầu/thực tế, đếm gói gửi/nhận), đọc code ghép T1/T4 khi mất gói.
-- ⏭️ **Cả hai:** chốt có dùng 4 mode + kịch bản 25 ms không (đang chờ trong `phanbien_nangcap.md`).
-- Chi tiết: Phần B mục 11 (tiến độ), mục 16 (câu hỏi mở).
+- ✅ Dựng lab, chạy được 3 chế độ, đọc xong mã `ntpnode.py`, **chốt phạm vi (A0)**.
+
+| Bước | Việc | Ai | Xong khi |
+|---|---|---|---|
+| 1 | Tắt đồng bộ giờ VMware + Ubuntu; lấy mã commit; viết `config_scenario.sh` (B-8.1); ping kiểm tra S0–S4 | Tùng | Ping khớp bảng B-8.1 |
+| 2 | Chạy thử `-v 4 -x`; sửa `parse_log.py` (cột yêu cầu/thực tế, đếm Sent/Received/mẫu hợp lệ) | Tuyến | Thấy `Interleaved mode` ở v4; ra đúng CSV |
+| 3 | Viết runner; pilot 4 mode × {S0, S4} × 1 lượt | Tùng | S4 lệch ≈ −15 ms, không lỗi |
+| 4 | Chạy 100 run (để qua đêm) | Tùng | Đủ 100 dòng metadata |
+| 5 | Tính chỉ số, vẽ 4–5 biểu đồ | Tuyến | Có biểu đồ chính |
+| 6 | Viết: Tuyến Ch.2 + Ch.4; Tùng Ch.3 | Cả hai | Bản nháp đủ |
+| 7 | *(tuỳ chọn)* Chèn trễ xử lý phía server | Cả hai | |
+
+Bước 1–4 là phần quan trọng nhất → dành khoảng **một nửa** thời gian còn lại. Chi tiết: Phần B mục 11 (tiến độ), mục 16 (câu hỏi mở).
 
 ## A7. Năm điều KHÔNG được viết sai trong báo cáo
 1. ❌ "Header NTPv5 180 byte" → ✅ header **48 byte**; 180 byte là cả gói của công cụ.
@@ -139,12 +168,12 @@ So sánh 3 chế độ:
 
 | RQ | Câu hỏi | Kết quả dự kiến | Kịch bản |
 |---|---|---|---|
-| RQ1 | NTPv5 có chính xác hơn NTPv4 dưới mạng xấu? | Gần như bằng nhau | S0–S4 |
-| RQ2 | Bất đối xứng ảnh hưởng thế nào? | Cả 3 lệch đúng (d↓−d↑)/2, khớp lý thuyết | S4, S5a |
-| RQ3 | Interleaved giúp bao nhiêu khi không có phần cứng? | Chỉ vài chục µs | S0, S5b |
-| RQ4 | Mất gói ảnh hưởng Interleaved thế nào? | Mất mẫu nhiều hơn, tự rơi về Basic | S3, S5a |
-| RQ5 | Mất gói có ép client từ v5 về v4? | Có thể có (điểm yếu ít tài liệu nói tới) | S5c |
-| RQ6 | Chi phí của NTPv5? | Gói 180 B vs 48 B (×3,75); thời gian khởi động lâu hơn | Tất cả |
+| RQ1 | Delay, jitter, mất gói, bất đối xứng tác động ra sao đến sai số ước lượng offset của NTPv4 và NTPv5? | v4 ≈ v5; jitter tăng phân tán; mất gói giảm số mẫu | S0–S4 (so từng cặp) |
+| RQ2 | Basic và Interleaved khác nhau thế nào về sai số và khả năng duy trì phép đo hợp lệ? | Chênh lệch nhỏ; M2 (v4) rơi về Basic nhiều hơn M4 (v5) khi mất gói | S0, S3 |
+| RQ3 | Bất đối xứng có tạo sai số gần mức lý thuyết (d↑ − d↓)/2 không? | S4 − S1 ≈ −15 ms cho cả 4 mode | S1, S4 |
+| RQ4 | Mỗi phương án đánh đổi thế nào giữa sai số, tỷ lệ mẫu hợp lệ và chi phí truyền thông? | v5 tốn ×3,75 byte, sai số không tốt hơn tương ứng | Tất cả |
+
+✅ Chốt 4 RQ ngày 24/10/2026 (thay 6 RQ cũ; bỏ câu hỏi hạ phiên bản v5→v4).
 
 ### 2.4 Kết luận dự kiến (một câu)
 NTPv5 là bước tiến về **thiết kế và bảo mật**, không phải về **độ chính xác**: thiếu timestamp phần cứng thì không vượt NTPv4, và bất đối xứng vẫn là "điểm mù" chung của mọi phiên bản.
@@ -449,15 +478,15 @@ Kiểm tra code (6.1 #1, #5): chỉ dùng `time.time()`, ghi giờ **trước** 
 | KB | C→S (`veth-c`) | S→C (`veth-s`) | Mục đích |
 |---|---|---|---|
 | S0 | không | không | Mốc chuẩn |
-| S1 | delay 10ms | delay 10ms | Trễ ổn định có gây sai? |
-| S2 | delay 20ms 10ms | delay 20ms 10ms | Giật thì sao? |
-| S3 | delay 20ms 5ms loss 5% | delay 20ms 5ms loss 5% | Mất gói, đặc biệt với Interleaved |
-| S4 | delay 10ms | delay 40ms | Bất đối xứng |
+| S1 | delay 25ms | delay 25ms | Trễ ổn định có gây sai? |
+| S2 | delay 25ms 10ms | delay 25ms 10ms | Giật thì sao? (so với S1) |
+| S3 | delay 25ms 10ms loss 5% | delay 25ms 10ms loss 5% | Mất gói (so với S2) |
+| S4 | delay 10ms | delay 40ms | Bất đối xứng (so với S1, cùng tổng 50 ms) |
 
-Ma trận chính (T18): 5 kịch bản × 3 chế độ × 5 lần lặp = **75 run**.
+Ma trận chính (T18): 5 kịch bản × **4 chế độ** × 5 lần lặp = **100 run** (✅ chốt 24/10).
 ❓ Phân phối jitter khi không khai `distribution`: man page tc-netem **không nói** → phải đo (1000 ping, vẽ histogram) và ghi phân phối quan sát được vào Ch.3.
 
-> 🔄 **Đề xuất sửa ma trận (chưa chốt)** — xem `phanbien_nangcap.md` mục 2: 4 mode (thêm M2 = NTPv4 Interleaved `-v 4 -x`), mọi kịch bản trễ trung bình 25 ms/chiều (S1 25/25; S2 25±10; S3 = S2 + loss 5%; S4 10/40), 100 run.
+> ✅ **Đã chốt 24/10/2026** (xem A0 và `phanbien_nangcap.md` D2–D4).
 
 Script `config_scenario.sh`:
 ```bash
@@ -469,9 +498,9 @@ apply() { $C tc qdisc add dev veth-c root netem $1; $S tc qdisc add dev veth-s r
 reset
 case "$1" in
   S0)    ;;
-  S1)    apply "delay 10ms"               "delay 10ms" ;;
-  S2)    apply "delay 20ms 10ms"          "delay 20ms 10ms" ;;
-  S3)    apply "delay 20ms 5ms loss 5%"   "delay 20ms 5ms loss 5%" ;;
+  S1)    apply "delay 25ms"               "delay 25ms" ;;
+  S2)    apply "delay 25ms 10ms"          "delay 25ms 10ms" ;;
+  S3)    apply "delay 25ms 10ms loss 5%"  "delay 25ms 10ms loss 5%" ;;
   S4)    apply "delay 10ms"               "delay 40ms" ;;
   reset) ;;
   *) echo "usage: $0 S0|S1|S2|S3|S4|reset"; exit 1 ;;
@@ -484,12 +513,14 @@ Kiểm chứng (T11): `sudo ./config_scenario.sh Sx` → `sudo ip netns exec ntp
 | KB | RTT trung bình kỳ vọng | Loss kỳ vọng |
 |---|---|---|
 | S0 | < 0,1 ms | 0% |
-| S1 | ~20 ms | 0% |
-| S2 | ~40 ms, dao động mạnh | 0% |
-| S3 | ~40 ms | ~10% (20 gói mất 1–3 là bình thường) |
+| S1 | ~50 ms | 0% |
+| S2 | ~50 ms, dao động mạnh (30–70) | 0% |
+| S3 | ~50 ms, dao động mạnh | ~10% (20 gói mất 1–3 là bình thường) |
 | S4 | ~50 ms | 0% |
 
-### 8.2 Kịch bản nâng cao S5 (lab ảo, T21)
+### 8.2 Kịch bản nâng cao S5 (lab ảo) — ❌ NGOÀI PHẠM VI (chốt 24/10)
+
+> Giữ lại để tham khảo cho mục "Hướng phát triển" (Ch.5). **Không chạy.** Hướng nâng cao duy nhất (tuỳ chọn) là chèn trễ xử lý phía server — xem `phanbien_nangcap.md` mục 6.
 
 **S5a — Bất đối xứng + mất gói theo cụm**
 ```bash
@@ -513,7 +544,9 @@ sudo ip netns exec ntp-s stress-ng --cpu 2 --io 2                     # cần c�
 - ❌ **Đã hạ ưu tiên:** công cụ chỉ hạ v4 khi > 8 lượt mất liên tiếp và nâng lại ngay → kết quả nói về công cụ, không về giao thức. Hướng nâng cao được chọn: **chèn trễ xử lý phía server** (`phanbien_nangcap.md` mục 6).
 - Cần thêm cột `version_actual` vào CSV.
 
-### 8.3 Kịch bản bắt buộc dùng máy thật (tuỳ chọn, sau T18)
+### 8.3 Kịch bản bắt buộc dùng máy thật — ❌ NGOÀI PHẠM VI (chốt 24/10)
+
+> Giữ lại để viết "Hướng phát triển" (Ch.5). **Không làm** trong đồ án.
 
 | Mã | Kịch bản | Vì sao không giả lập được | Cần gì | Ưu tiên |
 |---|---|---|---|---|
@@ -560,14 +593,14 @@ Câu xin mượn: *"em cần máy có card mạng hỗ trợ hardware timestampi
 | KB | Delay | Sai số offset (MAE / P95) | v4 Basic vs v5 Basic | v5 Interleaved |
 |---|---|---|---|---|
 | S0 | ~0,3–0,5 ms | vài chục µs | Bằng nhau | **Tốt hơn chút** (delay nhỏ hơn vài chục µs) |
-| S1 | ~20,5 ms | vài chục µs | Bằng nhau | Bằng nhau |
-| S2 | 20–60 ms | **~3,3 ms / ~7,8 ms** | Bằng nhau | Bằng nhau |
-| S3 | 30–50 ms | **~1,7 ms / ~3,9 ms**; ~90% lượt hỏi thành công (~135/150 mẫu) | Bằng nhau | Sai số tương đương, **ít mẫu hơn**, có lúc về Basic |
+| S1 | ~50,5 ms | vài chục µs | Bằng nhau | Bằng nhau |
+| S2 | 30–70 ms | **~3,3 ms / ~7,8 ms** | Bằng nhau | Bằng nhau |
+| S3 | 30–70 ms | **~3,3 ms / ~7,8 ms** (như S2); ~90% lượt hỏi thành công | Bằng nhau | Sai số như S2, **ít mẫu hơn**; M2 (v4) rơi về Basic nhiều hơn M4 (v5) |
 | S4 | ~50 ms | **~15 ms / ~15 ms** (lệch cố định) | Bằng nhau | **Bằng nhau, cùng lệch 15 ms** |
 
 Cách tính:
 - **S2:** mỗi chiều giật đều ±10 ms → offset = (giật chiều đi − giật chiều về)/2 → phân phối tam giác trên [−10, 10] ms → MAE = 10/3 ≈ 3,3 ms; P95 = 10·(1 − √0,05) ≈ 7,8 ms.
-- **S3:** tương tự với ±5 ms → MAE ≈ 1,7 ms; P95 ≈ 3,9 ms. Lượt hỏi thành công ≈ 0,95 × 0,95 ≈ 90%.
+- **S3:** cùng jitter ±10 ms như S2 → sai số từng mẫu như S2; mất gói chỉ làm giảm số mẫu. Lượt hỏi thành công ≈ 0,95 × 0,95 ≈ 90%.
 - **S4:** offset = server − client (đã xác minh trong mã) → (d↑ − d↓)/2 = (10 − 40)/2 = **−15 ms**.
 - ❓ Các giá trị MAE/P95 của S2/S3 giả định jitter phân phối đều — chưa kiểm chứng; chỉ là tham chiếu, **không đưa vào phần kết quả**.
 
@@ -621,7 +654,7 @@ Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interlea
 | T01–T03 | Chuẩn bị lý thuyết/dữ liệu | Tuyến | ❓ | Tuyến cập nhật |
 | T04 | Ubuntu 22.04.5 + công cụ + clone ntp5-exp | Tùng | ✅ | |
 | T05 | 2 namespace + veth, ping OK | Tùng | ✅ | |
-| T06 | Duyệt kịch bản | Cả hai | ⬜ | Duyệt mục 8 |
+| T06 | Duyệt kịch bản | Cả hai | ✅ 24/10 | Chốt phạm vi A0 |
 | T07–T08 | Schema CSV, `export_logs.py` | Tuyến | ❓ | Xem mục 10.1 |
 | T09 | Chạy được 3 chế độ | Tùng | ✅ | Server cần `-l` |
 | — | Kiểm tra mã `ntpnode.py` | Tùng | ✅ 24/10 | Mục 6 |
@@ -629,14 +662,13 @@ Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interlea
 | T11 | Kiểm chứng qdisc + ping S1–S4 | Tùng | ⬜ | Bảng ở mục 8.1 |
 | T12–T14 | Pipeline phân tích | Tuyến | ⬜ | |
 | T15–T17 | Runner + pilot (S0, S4) | Tùng | ⬜ | |
-| T18 | Ma trận chính 75 run | Tùng | ⬜ | |
+| T18 | Ma trận chính 100 run (4 mode × 5 KB × 5 lặp) | Tùng | ⬜ | `-i 1`, bỏ 60 s, 120 request/run |
 | T19–T20 | QA dữ liệu + PCAP | Tuyến | ⬜ | Xác nhận 180 B bằng PCAP |
-| T21 | S5 nâng cao (S5a, S5b, S5c) | Tùng | ⬜ | |
+| T21 | *(tuỳ chọn)* Chèn trễ xử lý phía server | Cả hai | ⬜ | Chỉ sau T18 + có biểu đồ chính |
 | T22–T24 | KPI, biểu đồ, Ch.2 & Ch.4 | Tuyến | ⬜ | |
 | T25–T26 | Ch.3, chạy lại run lỗi | Tùng | ⬜ | |
 | T27–T30 | Báo cáo, slide, demo, đóng gói mã | Cả hai | ⬜ | |
-| (tuỳ chọn) | Máy thật P1 Wi-Fi | Tùng | ⬜ | Sau T18 |
-| (tuỳ chọn) | Máy thật P2 HW timestamp | Tùng | ⬜ | Cần mượn lab |
+| — | Máy thật (Wi-Fi, HW timestamp) | — | ❌ | Ngoài phạm vi → Hướng phát triển |
 
 ---
 
@@ -657,15 +689,16 @@ Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interlea
 | # | Ý tưởng | Giá trị | Trạng thái |
 |---|---|---|---|
 | I1 | Router ở giữa (namespace thứ 3) | An toàn nếu script dùng timestamp kernel | ❌ Không cần — script dùng `time.time()` (mục 7.3) |
-| I2 | S5c: đo bị ép về v4 khi mất gói | Phát hiện ít tài liệu nói tới (RQ5) | ⬜ |
-| I3 | S5b: server quá tải CPU | Kịch bản Interleaved có thể thắng rõ | ⬜ |
-| I4 | Đo chi phí (byte, băng thông, thời gian khởi động) | Đúng tinh thần "hiệu năng mạng" | ⬜ |
-| I5 | So sánh `-f 4` vs `-f 8` vs nhiều hơn | Ảnh hưởng tới kích thước gói và thời gian khởi động | ⬜ |
-| I6 | P1 Wi-Fi thật (1 laptop) | Kiểm chứng ngoài thực tế, rẻ | ⬜ |
-| I7 | P2 HW timestamp với chrony | Chứng minh "Interleaved cần phần cứng" | ⬜ cần mượn lab |
-| I8 | Mô phỏng đồng hồ trôi bằng cách sửa `read_clock()` | Đo ảnh hưởng độ trễ 1 lượt của Interleaved | ⬜ |
-| I9 | Đổi tên đề tài thêm "và giới hạn" | Khớp kết quả dự kiến | ⬜ hỏi GVHD |
-| I10 | Tạo trang ngắn xin mượn thiết bị gửi GV lab | | ⬜ |
+| I2 | S5c: đo bị ép về v4 khi mất gói | Công cụ khác draft (> 8 lượt mất) | ❌ bỏ (D8) |
+| I3 | S5b: server quá tải CPU | Thay bằng I11 (có kiểm soát hơn) | ❌ |
+| I4 | Đo chi phí (byte, thời gian khởi động) | Đúng tinh thần "hiệu năng mạng" | ✅ đã vào KPI (A0) |
+| I5 | So sánh `-f 4` vs `-f 8` | | ❌ sau đồ án |
+| I6 | Wi-Fi thật (1 laptop) | | ❌ hướng phát triển |
+| I7 | HW timestamp với chrony | | ❌ hướng phát triển |
+| I8 | Mô phỏng đồng hồ trôi (sửa `read_clock()`) | | ❌ sau đồ án |
+| I9 | Đổi tên đề tài | | ⏳ hỏi GVHD (D1) |
+| I10 | Trang xin mượn thiết bị lab | | ❌ không cần |
+| I11 | Chèn trễ xử lý phía server | Chứng minh cơ chế Interleaved | 🟡 tuỳ chọn, sau T18 (D7) |
 
 ---
 
@@ -745,14 +778,21 @@ Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interlea
 ```bash
 cd ~/Desktop/ntp5-exp
 
+# Trước mỗi đợt chạy: tắt đồng bộ giờ (D9)
+vmware-toolbox-cmd timesync disable
+vmware-toolbox-cmd timesync status        # phải ra: Disabled
+sudo timedatectl set-ntp false
+timedatectl                               # phải ra: NTP service: inactive
+git rev-parse HEAD                        # ghi mã commit vào metadata
+
 # Server (Terminal 1)
 sudo ip netns exec ntp-s python3 ntpnode.py -l -p 10123
 
-# Client (Terminal 2)
-sudo ip netns exec ntp-c python3 ntpnode.py -d -v 4    10.10.0.2:10123   # NTPv4 Basic
-sudo ip netns exec ntp-c python3 ntpnode.py -d -v 5    10.10.0.2:10123   # NTPv5 Basic
-sudo ip netns exec ntp-c python3 ntpnode.py -d -v 5 -x 10.10.0.2:10123   # NTPv5 Interleaved
-sudo ip netns exec ntp-c python3 ntpnode.py -d         10.10.0.2:10123   # Tự thương lượng (S5c)
+# Client (Terminal 2) — chạy chính thức dùng -i 1
+sudo ip netns exec ntp-c python3 ntpnode.py -d -i 1 -v 4    10.10.0.2:10123   # M1 NTPv4 Basic
+sudo ip netns exec ntp-c python3 ntpnode.py -d -i 1 -v 4 -x 10.10.0.2:10123   # M2 NTPv4 Interleaved
+sudo ip netns exec ntp-c python3 ntpnode.py -d -i 1 -v 5    10.10.0.2:10123   # M3 NTPv5 Basic
+sudo ip netns exec ntp-c python3 ntpnode.py -d -i 1 -v 5 -x 10.10.0.2:10123   # M4 NTPv5 Interleaved
 
 # Kịch bản mạng
 sudo ./config_scenario.sh S3
@@ -788,3 +828,5 @@ Lỗi thường gặp:
 |---|---|---|
 | 24/10/2026 | Tùng (+AI) | Tạo file: tổng hợp phân tích draft-09, kiểm tra ntp5-exp, topology, kịch bản S0–S5, máy thật P1–P3, dự đoán, tiến độ, ý tưởng, chuẩn bị bảo vệ |
 | 24/10/2026 | Tùng (+AI) | Phản biện theo tài liệu góp ý của nhóm → tạo `phanbien_nangcap.md`. Đính chính: RFC 9769 (NTPv4 Interleaved), hành vi thương lượng của công cụ (> 8 lượt mất, không có 256), jitter mặc định chưa kiểm chứng, dấu S4 = −15 ms, cách server lưu T3 (v4 xoá / v5 giữ). Hạ ưu tiên S5c; hướng nâng cao chọn: chèn trễ xử lý phía server |
+| 24/10/2026 | Tùng (+AI) | Thêm Phần A (đọc nhanh) |
+| 24/10/2026 | Tùng + Tuyến | **🔒 Chốt phạm vi (A0):** 4 mode, S1–S4 trễ trung bình 25 ms/chiều, 100 run, `-i 1` + bỏ 60 s + 120 request/run, 4 RQ, thống kê đơn giản; máy thật/S5/kiểm định nâng cao → hướng phát triển. Sửa script 8.1, bảng ping, dự đoán mục 9, tiến độ, kho ý tưởng, cheat sheet |
