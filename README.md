@@ -10,7 +10,16 @@ Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & d�
 | `phanbien_nangcap.md` | **Hộp góp ý**: ý tưởng, sửa phương pháp **chưa chốt** | Tùng, Tuyến, AI | Khi có góp ý mới; khi một đề xuất được chấp nhận/bác bỏ |
 | `phantich.md` | **Bàn giao cho AI**: đọc khối "BÀN GIAO" ở đầu file là AI mới làm tiếp được | AI | Khi trạng thái đồ án thay đổi đáng kể |
 | `hoc_doan.md` | **Học đồ án**: bản đồ 12 bài + prompt cho AI gia sư | Tùng, Tuyến | Khi phạm vi/kết quả đồ án thay đổi |
-| `scripts/` | `config_scenario.sh` (5 kịch bản NetEm), `run_matrix.sh` (chạy pilot/100 run) | Tùng | Khi sửa script trên máy ảo |
+| `scripts/` | NetEm/runner (Tùng) và các script Python parser/KPI (Tuyến); một converter ở nhánh `Tuyen-integration` | Cả hai | Khi thay đổi công cụ, kiểm tra chạy và ghi rõ trạng thái nghiệm thu |
+
+## Tiến độ gần nhất (26/10/2026)
+
+- **Đã xác nhận:** Tùng có NetEm S0–S4 và pilot S0/S4 **8/8 run đạt** (24/10; xem `doan.md` mục 12). Tuyến kiểm thử localhost đủ M1–M4, 268 mẫu, tạo parser/metadata/KPI bản thử.
+- **GitHub:** Sáu script Python P1 đã được gộp vào `main` qua [PR #5](https://github.com/Grant-Tung/DoAnDanhGiaHieuNang/pull/5); shell runner/NetEm P2 cũng trên `main`.
+- **Chưa hoàn tất:** chuyển và phân tích log pilot NetEm thực tế bằng parser P1, kiểm chứng request/response khi mất gói, đúng 120 request sau warm-up, QA kết quả 100 run và báo cáo cuối.
+- **Tiếp theo:** Tùng bàn giao log S0/M4 từ pilot; Tuyến xác minh CSV/KPI, rồi kiểm tra S4/S3 trước khi xử lý ma trận chính.
+
+**Phạm vi đánh giá không đổi:** 4 mode (M1–M4), 5 kịch bản (S0–S4), 5 lần lặp = 100 run. Localhost và log giả lập chỉ dùng thử công cụ, không phải số liệu kết luận.
 
 ## Vòng đời của một ý tưởng
 
