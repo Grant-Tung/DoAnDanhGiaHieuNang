@@ -23,6 +23,20 @@
 
 ---
 
+### Cập nhật nghiệm thu và rủi ro triển khai (26/10/2026; không sửa quyết định D1–D11)
+
+| Hạng mục | Bằng chứng mới | Trạng thái tính đến 26/10 |
+|---|---|---|
+| A1, A7 | Cả hai đã dùng `ntp5-exp` commit `fe19210`; P1 localhost chạy M1–M4, 268 mẫu; P2 có log mode pilot | ✅ Kiểm tra chức năng, không đồng nghĩa QA 100 run |
+| A4, A6 / B1 | P2 đã kiểm tra NetEm S0–S4, ping S3 500 gói ~10,2% mất; pilot S0/S4 8/8 run đạt, S4 bias khoảng −15 ms | ✅ Bằng chứng tại `doan.md` B-12; **chưa có pilot S3 được xác nhận trong hồ sơ** |
+| A8 | P1 có parser/metadata/timed log/KPI; V2 qua thử ranh giới và mất một response *giả lập*; 6 script Python merged PR #5 | 🟡 Bản thử đạt, cần QA trên log NetEm của P2 |
+| Tích hợp | Runner ghi log epoch; P1 parser đọc elapsed+phase. `convert_runner_log.py` trên nhánh `Tuyen-integration` đã `py_compile`/`--help` | ⬜ Chưa có kết quả chuyển đổi + phân tích một run S0/M4 thật |
+| Kiểm soát phép đo | Runner hiện chạy theo 300 giây, trong pilot từng có 149 mẫu/run (119 sau warm-up), chưa xác minh yêu cầu **120 request trong MEASURE** | ⚠️ Chốt cách đếm/nhật ký trước 100 run |
+| A2 & mất gói | Parser V2 gán response cho request chờ gần nhất; chưa kiểm chứng phản hồi đến trễ/ghép T1–T4 khi Interleaved | ⚠️ Chưa được chứng minh đúng trên NetEm S3/PCAP |
+| C1/C2 | Chưa có dữ liệu 100 run và báo cáo QA đủ 100 run được bàn giao/kiểm chứng | ⬜ Không đánh dấu hoàn thành trước khi có dữ liệu |
+
+**Việc ưu tiên duy nhất:** tích hợp một run pilot S0/M4 từ P2 → đối chiếu S4/S3 → QA runner/CSV → mới thực hiện/đối chiếu ma trận chính 100 run. Không mở rộng S5 hoặc máy thật.
+
 > Trả lời tài liệu "TÓM TẮT ĐỒ ÁN NTPv5 — BẢN GỬI AI RÀ SOÁT VÀ NÂNG CẤP" (24/10/2026).
 > Người đọc: Tùng (P2), Tuyến (P1).
 > Nguồn đã đọc trực tiếp ngày 24/10/2026: `ntpnode.py` nhánh `master` trên GitHub, RFC 9769 (rfc-editor.org), man page tc-netem (man7.org), trang Datatracker của draft-ietf-ntp-ntpv5. Thêm vào đó là output `grep`/`sed` Tùng chạy trên bản clone ở máy P2.
