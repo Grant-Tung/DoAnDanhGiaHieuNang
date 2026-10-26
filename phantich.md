@@ -13,17 +13,19 @@
    - Không đưa số dự đoán vào phần kết quả.
    - Mọi thay đổi: cập nhật `doan.md` (tiến độ mục 11, câu hỏi mục 16, lịch sử mục 19; sửa Phần A nếu ảnh hưởng). Ý tưởng/sửa phương pháp chưa được nhóm đồng ý → ghi vào `phanbien_nangcap.md`, **không** ghi vào `doan.md` như đã chốt.
    - Nếu có kiến thức mới quan trọng cho AI sau → cập nhật khối bàn giao này.
-5. **Repo:** https://github.com/Grant-Tung/DoAnDanhGiaHieuNang (private). Nhánh `main` = bản thống nhất; `Tung`, `Tuyen` = nhánh cá nhân; gộp qua Pull Request.
+5. **Repo:** https://github.com/Grant-Tung/DoAnDanhGiaHieuNang (trang repo hiện hiển thị Public). Nhánh `main` = bản thống nhất; `Tung`, `Tuyen` = nhánh cá nhân; gộp qua Pull Request.
 
-### Trạng thái hiện tại (cập nhật 24/10/2026)
-- ✅ Lab 2 namespace chạy được 3 mode; đã đọc mã `ntpnode.py`. Commit nhóm dùng: **`fe19210790b2a1cbd951e3e5066dca094dd62a52`** = bản mới nhất nhánh `main` trên GitHub (đã so bằng GitHub API 24/10). Khi có mâu thuẫn giữa bản tóm tắt mã và output `sed` trên máy nhóm, **tin output trên máy** (ví dụ: `transmit_ts` được đọc trước `encode()`).
-- ✅ Tuyến (P1) đã chạy 3 mode trên localhost, có `parse_log.py` → 241 mẫu (smoke test, không dùng để kết luận).
-- 🔒 **PHẠM VI ĐÃ ĐÓNG BĂNG (24/10/2026)** — xem `doan.md` mục A0. Tóm tắt: 4 mode (M1 v4 Basic, M2 v4 Interleaved, M3 v5 Basic, M4 v5 Interleaved); S0 không trễ, S1 25/25, S2 25±10, S3 = S2 + loss 5%, S4 10/40 ms; 100 run; `-i 1`, bỏ 60 s, 120 request/run; 4 RQ; thống kê đơn giản (run là đơn vị, trung bình + khoảng dao động). Tuỳ chọn duy nhất: chèn trễ xử lý phía server, sau khi xong 100 run.
-- ⛔ **AI KHÔNG được đề xuất mở rộng phạm vi** (máy thật, S5, kiểm định nâng cao, kịch bản mới, rà soát thêm). Nếu người dùng tự nêu ý tưởng mới → ghi vào `phanbien_nangcap.md` nhãn "sau đồ án". Chỉ đề xuất đổi bảng A0 khi số liệu pilot chứng minh không chạy được.
-- ⏳ Còn chờ duy nhất: tên đề tài (hỏi GVHD).
-- ✅ (24/10) Bước 1–3 trong `doan.md` A6 xong: NetEm kiểm chứng bằng ping (jitter phân phối đều), 4 mode chạy được, runner `scripts/run_matrix.sh` + pilot 8/8 ok, S4 lệch −15,0 ms đúng lý thuyết.
-- ⏭️ Việc kế tiếp: Tùng chạy `sudo ./run_matrix.sh main` (100 run, ~8 giờ 40); Tuyến viết `parse_log.py` theo định dạng ở `doan.md` B-10.1 (thử trên dữ liệu `runs/pilot`). Vai trò của AI giờ là **hỗ trợ thực thi** (viết script, đọc log, gỡ lỗi), không thiết kế lại.
-- ⚠️ Máy Tùng dùng locale dấu phẩy thập phân → mọi lệnh `awk`/`printf` trong shell phải có `LC_ALL=C`.
+### Trạng thái hiện tại (cập nhật 26/10/2026)
+- 🔒 **Phạm vi không đổi:** theo `doan.md` A0: M1–M4 × S0–S4 × 5 lặp = **100 run**, 60 s warm-up, `-i 1`, mục tiêu 120 request/MEASURE; phần nâng cao chỉ sau khi xong ma trận chính.
+- ✅ [QS] **Tùng/P2:** Ubuntu VMware, 2 namespace/veth, NetEm và kiểm chứng ping S0–S4; runner `scripts/run_matrix.sh` có trên `main`; **pilot ngày 24/10 S0/S4 đạt 8/8 run**, S4 bias gần **−15,0 ms**. Xem số liệu tại `doan.md` B-12. **Không nhầm pilot với 100 run chính thức.**
+- ✅ [QS] **Tuyến/P1:** Ubuntu 26.04.1 trên VirtualBox; commit `ntp5-exp` `fe19210790b2a1cbd951e3e5066dca094dd62a52`; chạy **đủ M1–M4 localhost với 268 mẫu** (M1 33; M2 27 với 26 Interleaved; M3 12; M4 196 với 195 Interleaved). Chỉ là smoke test.
+- ✅ [QS] P1 đã tạo script parser, CSV samples/metadata, timed logging, phân biệt WARMUP/MEASURE, KPI bias/MAE/P95/delay. Parser V2 qua hai ca **log giả lập** (mất 1 response; response vượt ranh giới warm-up), và chạy được log M4 localhost thật (44 mẫu sau warm-up). Đây chưa phải kiểm định NetEm thực tế.
+- ✅ [GitHub] PR [#5](https://github.com/Grant-Tung/DoAnDanhGiaHieuNang/pull/5) đã merged 6 chương trình Python P1 vào nhánh `main` ngày 26/10; script shell P2 cũng có trên `main`.
+- 🟡 [CKC] `scripts/convert_runner_log.py` đang ở nhánh `Tuyen-integration`, đã qua `py_compile`/`--help` nhưng chưa được chạy với `runs/pilot/.../client.log`. Runner gắn **epoch** ở đầu dòng; parser V2 đòi `[elapsed] [WARMUP/MEASURE]`.
+- ⚠️ [CKC] Chưa xác minh ghép response trễ và timestamp Interleaved trong kịch bản mất gói; cần kiểm tra cách đếm đúng **120 request ở MEASURE** và nguồn commit thực nghiệm khi chạy từ repo nhóm. Bản runner hiện tại dùng thời gian cố định 300 s; không được xem điều này tự động bằng 120 request đo hợp lệ.
+- ⬜ [CKC] Chưa có bằng chứng trong dữ liệu được bàn giao rằng **100 run chính thức** đã hoàn thành; cũng chưa có bộ biểu đồ/KPI chính thức từ S0–S4. Không suy đoán tiến độ trên máy Tùng chưa xem.
+- ⏭️ **Việc tiếp theo:** Tùng bàn giao một run S0/M4 đã có từ pilot → Tuyến chuyển log/parse/KPI và đối chiếu metadata; kế đến kiểm tra S4, S3 (mất gói), khắc phục các khác biệt runner/parser → mới chạy/tiếp tục ma trận 100 run. Không bổ sung kịch bản mới.
+- ⚠️ Locale máy Tùng: cần `LC_ALL=C` khi dùng lệnh shell xử lý số thập phân.
 
 ### Khối đính chính (ưu tiên hơn phần thân bên dưới)
 > - Công cụ ntp5-exp hạ về v4 khi **> 8 lượt mất liên tiếp** và nâng lại v5 ngay; **không có** cơ chế "chờ 256 request". Quy tắc "mất 2 → v4, chờ 256" của draft chưa đối chiếu nguyên văn.
@@ -47,7 +49,7 @@
 ## 1. Tổng quan đồ án
 
 - **Đề tài:** Đánh giá hiệu năng giao thức đồng bộ thời gian NTPv5.
-- **Mục tiêu:** So sánh 3 chế độ `NTPv4 Basic`, `NTPv5 Basic`, `NTPv5 Interleaved` dưới điều kiện mạng giả lập S0–S4 (+ S5 nâng cao).
+- **Mục tiêu:** So sánh 4 chế độ M1 NTPv4 Basic, M2 NTPv4 Interleaved, M3 NTPv5 Basic, M4 NTPv5 Interleaved trong S0–S4; 100 run chính theo `doan.md` A0 (không làm S5 trong phạm vi bắt buộc).
 - **Trạng thái giao thức:** NTPv5 là Internet-Draft (draft-ietf-ntp-ntpv5-09), chưa phải RFC.
 - **Công cụ:** `ntpnode.py` từ repo thực nghiệm của Miroslav Lichvar (tác giả draft, maintainer chrony): https://github.com/mlichvar/ntp5-exp, clone tại `~/Desktop/ntp5-exp`.
 
@@ -61,20 +63,15 @@
 
 ## 2. Môi trường & tiến độ
 
-### Đã xong
-- **T04:** Ubuntu 22.04.5 LTS trên VMware; cài `git python3 iproute2 tcpdump iperf3`; `open-vm-tools-desktop` (copy-paste `Ctrl+Shift+V`); clone `ntp5-exp`.
-- **T05:** 2 namespace nối trực tiếp bằng 1 cặp veth:
-  - `ntp-c` (client) — `veth-c` 10.10.0.1/24
-  - `ntp-s` (server) — `veth-s` 10.10.0.2/24
-  - ping 2 chiều 0% loss, RTT ~0,05 ms.
-- **T09:** chạy được cả 3 chế độ trên UDP port 10123:
-  - Server cần cờ `-l` (`--local`, local reference clock, stratum 1) — nếu thiếu sẽ lỗi `Unsynchronized response` / `Not selected (missing sample)`.
-  - Đã xử lý `[Errno 98] Address already in use` và `[Errno 111] Connection refused`.
-  - `-v 4`: gói 48 B. `-v 5`: gói 180 B. `-v 5 -x`: gói 180 B, `flags=2`, log `Interleaved mode offset=...` từ nhịp thứ 2.
+### Đã xong (xem `doan.md` B-11/B-12 cho bằng chứng và mốc cập nhật)
+- **P2 (Tùng):** VM Ubuntu 22.04.5 trên VMware, 2 namespace `ntp-c`/`ntp-s`, veth 10.10.0.1 ↔ 10.10.0.2; script NetEm S0–S4; ping kiểm chứng; chạy M1–M4; runner và pilot S0/S4 8/8 run đạt (24/10).
+- **P1 (Tuyến):** VM Ubuntu 26.04.1 trên VirtualBox, `ntp5-exp`; M1–M4 localhost **268 mẫu**, xuất samples/metadata CSV; timed log, parser V2 và KPI bản thử; 6 file Python merged vào `main` bằng PR #5 (26/10).
+- **Chưa coi là hoàn tất:** QA log NetEm thật qua pipeline P1, xử lý ghép response/Interleaved khi mất gói, kết quả S0–S4 của ma trận 100 run.
 
 ### Tiếp theo
-- **T10:** script `config_scenario.sh` cấu hình/reset NetEm cho S0–S4 (xem khuyến nghị topology ở mục 8 — **quan trọng**).
-- **T11:** kiểm chứng qdisc (`tc -s qdisc show dev ...`) + ping trước khi chạy runner.
+- **Tùng:** bàn giao pilot S0/M4 (+ log/metadata/PCAP/qdisc nếu có), xác minh đường dẫn chạy runner từ repository nhóm và mốc 120 request sau warm-up.
+- **Tuyến:** dùng converter (nhánh `Tuyen-integration`) rồi parser/KPI đọc log pilot, so sánh với dữ liệu thô và xác minh response matching; sau S0 kiểm tra S4/S3.
+- **Cả hai:** chỉ phê duyệt 100 run chính thức khi QA đầu-cuối đạt; tiến độ bài viết theo `doan.md` B-11.
 
 ### Lộ trình
 | Giai đoạn | Task |
@@ -82,7 +79,7 @@
 | 1 Cài đặt | T01–T03 (P1), T04–T05 (P2, xong), T06 duyệt kịch bản |
 | 2 Kết nối & đo | T07–T08 (P1), T09 (P2, xong), T10–T11 (P2, tiếp theo) |
 | 3 Pilot & tự động hoá | T12–T14 (P1), T15–T17 (P2 runner & pilot) |
-| 4 Ma trận chính | T18 (P2, ≥75 runs S0–S4 = 5 kịch bản × 3 chế độ × 5 lần lặp), T19–T20 (P1 QA & PCAP), T21 (S5) |
+| 4 Ma trận chính | T18 (P2, **100 runs** = 5 kịch bản × 4 mode × 5 lặp), T19–T20 (P1 QA & PCAP); chỉ thực hiện khi tích hợp dữ liệu đạt |
 | 5 Phân tích & báo cáo | T22–T24 (P1 KPI, biểu đồ, Ch.2 & 4), T25–T26 (P2 Ch.3, chạy lại run lỗi) |
 | 6 Bảo vệ | T27–T30 (báo cáo, slide, demo, đóng gói mã) |
 
@@ -481,9 +478,14 @@ sudo ip netns exec ntp-s tcpdump -i veth-s -w run.pcap udp port 10123
 5. Bổ sung kịch bản S5c (hạ phiên bản khi mất gói, chạy client không `-v`); quy tắc bỏ 60 s warm-up.
 6. Context v7 cần sửa: câu "Interleaved triệt tiêu sai số trễ hàng đợi" → "giảm sai số xử lý phía host server"; danh sách EF của 180 B (cookie nằm trong header, không phải EF).
 
-### Việc tiếp theo (theo thứ tự)
-- [ ] **T10 (P2):** tạo `~/Desktop/ntp5-exp/config_scenario.sh` (bản 2 namespace, mục 8), `chmod +x`.
-- [ ] **T11 (P2):** với từng S1–S4: `sudo ./config_scenario.sh Sx` → `sudo ip netns exec ntp-c ping -c 20 10.10.0.2` → đối chiếu RTT/loss với bảng kỳ vọng (S0 <0,1 ms/0%; S1 ~20 ms/0%; S2 ~40 ms dao động/0%; S3 ~40 ms/~10%; S4 ~50 ms/0%) → `reset`.
-- [ ] **Phụ (cho P1):** `sed -n '554,630p' ntpnode.py` → xác định server lưu T3 Interleaved thế nào (mục 11 "Còn chưa xác minh" #2).
-- [ ] **Phụ:** đọc `receive_response` (dòng 403–480) → quy ước dấu offset (dấu ±15 ms ở S4).
-- [ ] Sau T11: pilot T15–T17 (3 chế độ × S0, S4, vài phút mỗi run) → viết runner tự động.
+### Phiên 2026-10-26 (Tuyến — P1)
+- [QS] Đã chạy 4 mode localhost; tổng 268 mẫu. M2 và M4 có 26/27 và 195/196 mẫu Interleaved.
+- [QS] `capture_timed.py` ghi và phân WARMUP/MEASURE; `parse_timed_v2.py` qua 2 ca log giả lập và log M4 localhost; `analyze_runs.py` tạo CSV KPI. Không sử dụng các số localhost vào Ch.4 kết quả mạng.
+- [QS] 6 file Python đã vào `main` của GitHub nhóm qua PR #5. `convert_runner_log.py` chỉ được xác nhận cú pháp/CLI và nằm ở nhánh `Tuyen-integration`.
+- [CKC] Chưa xác minh pipeline trên log NetEm của Tùng, chưa kiểm tra đầy đủ request-response pairing trong điều kiện mất gói/trễ, chưa có 100 run chính thức được bàn giao.
+
+### Việc tiếp theo (theo thứ tự, cập nhật 26/10/2026)
+- [ ] Nhận một run S0/M4 từ pilot của Tùng (client/server log, metadata, PCAP/qdisc nếu có).
+- [ ] Tuyến chạy converter → parser → KPI; đối chiếu request/response và 60 s warm-up. Kiểm tra tiếp S4 và S3.
+- [ ] Tùng/ Tuyến thống nhất runner: đường dẫn `ntpnode.py`, commit gốc, cách cắt đúng 120 request MEASURE; kiểm tra lại trên VM P2.
+- [ ] Khi QA đầu-cuối đạt: thu/QA 100 run, tổng hợp thống kê mỗi run, biểu đồ, viết báo cáo.
