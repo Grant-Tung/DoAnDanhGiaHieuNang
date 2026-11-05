@@ -92,7 +92,7 @@ Bản chữ (nếu không xem được hình):
 │            │  chiều C→S                                    chiều S→C   │         │
 │            └───────────────────────────────────────────────────────────┘         │
 │                                                                                 │
-│   run_matrix.sh: áp kịch bản → bật server → tcpdump → client 300 s → metadata   │
+│   run_matrix.sh: áp kịch bản → server → tcpdump → client 60 s + 120 req → meta  │
 └─────────────────────────────────────────────────────────────────────────────────┘
 Offset thật = 0 (chung đồng hồ) → offset đo được = sai số của NTP.
 ```
