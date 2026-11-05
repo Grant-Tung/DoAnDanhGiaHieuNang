@@ -1,1 +1,4 @@
-*.sh text eol=lf
+*.pcap binary
+runs/**/*.log -text
+runs/**/*.csv -text
+runs/**/*.txt -text
