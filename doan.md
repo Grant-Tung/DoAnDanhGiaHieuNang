@@ -849,6 +849,7 @@ sudo ip netns exec ntp-s tcpdump -i veth-s -X udp port 10123            # xem n�
 
 # Runner (chạy trong ~/Desktop/ntp5-exp)
 sudo ./run_matrix.sh test         # 1 run S0/M4, ~5 phút — kiểm thử runner trước khi chạy main
+sudo ./run_matrix.sh s3           # 4 run S3 × M1–M4, ~22 phút — pilot mất gói (fallback, ghép request–response)
 sudo ./run_matrix.sh pilot        # 8 run, ~42 phút
 sudo ./run_matrix.sh main         # 100 run, ~8 giờ 40; bị ngắt → chạy lại đúng lệnh này
 
