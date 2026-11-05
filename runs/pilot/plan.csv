@@ -1,0 +1,9 @@
+run_id,block,order,rep,scenario,mode
+pilot-b1-01_S0_M3,1,1,1,S0,M3
+pilot-b1-02_S4_M2,1,2,1,S4,M2
+pilot-b1-03_S4_M1,1,3,1,S4,M1
+pilot-b1-04_S0_M4,1,4,1,S0,M4
+pilot-b1-05_S4_M4,1,5,1,S4,M4
+pilot-b1-06_S0_M2,1,6,1,S0,M2
+pilot-b1-07_S4_M3,1,7,1,S4,M3
+pilot-b1-08_S0_M1,1,8,1,S0,M1
