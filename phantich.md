@@ -15,6 +15,12 @@
    - Nếu có kiến thức mới quan trọng cho AI sau → cập nhật khối bàn giao này.
 5. **Repo:** https://github.com/Grant-Tung/DoAnDanhGiaHieuNang (trang repo hiện hiển thị Public). Nhánh `main` = bản thống nhất; `Tung`, `Tuyen` = nhánh cá nhân; gộp qua Pull Request.
 
+### Cập nhật 05/11/2026 (Tùng + AI) — ưu tiên hơn các dòng 26/10 bên dưới
+- ✅ [QS] Dữ liệu pilot 24/10 (8 run, có PCAP) đã ở `runs/pilot/` trên `main` (PR #9) → Tuyến `git pull` là có, không cần gửi ZIP.
+- ✅ [QS] `convert_runner_log.py` đã ở `main` (PR #6), không còn chỉ ở nhánh `Tuyen-integration`.
+- 🟡 [CKC] `scripts/run_matrix.sh` đã sửa theo yêu cầu Tuyến (dừng theo 120 request MEASURE, kiểm tra số đếm trước `ok`, cột measure_*, pha `test`) — chi tiết `doan.md` B-10.1. **Chưa chạy trên VM.** Việc kế: chép runner vào `~/Desktop/ntp5-exp/` → `sudo ./run_matrix.sh test` → kiểm tra `runs/test/metadata.csv` → báo Tuyến → rồi mới `main`.
+- Học (`hoc_doan.md`): Tùng xong M0–M4.3, đang ở M4.4 (mất gói và Interleaved).
+
 ### Trạng thái hiện tại (cập nhật 26/10/2026)
 - 🔒 **Phạm vi không đổi:** theo `doan.md` A0: M1–M4 × S0–S4 × 5 lặp = **100 run**, 60 s warm-up, `-i 1`, mục tiêu 120 request/MEASURE; phần nâng cao chỉ sau khi xong ma trận chính.
 - ✅ [QS] **Tùng/P2:** Ubuntu VMware, 2 namespace/veth, NetEm và kiểm chứng ping S0–S4; runner `scripts/run_matrix.sh` có trên `main`; **pilot ngày 24/10 S0/S4 đạt 8/8 run**, S4 bias gần **−15,0 ms**. Xem số liệu tại `doan.md` B-12. **Không nhầm pilot với 100 run chính thức.**
@@ -29,7 +35,7 @@
 
 ### Việc dở dang khi đóng phiên 24/10/2026 (hỏi người dùng tình trạng trước khi làm tiếp)
 1. **Chạy 100 run** `sudo ./run_matrix.sh main` trên máy ảo — chưa xác nhận đã bắt đầu/xong. Kiểm tra: `grep -c ',ok$' runs/main/metadata.csv` phải = 100; rồi chạy lệnh "Kiểm tra nhanh" ở `doan.md` mục 18.
-2. **Gửi `runs_pilot.tgz` cho Tuyến** — file đã nằm ở `~/Desktop/runs_pilot.tgz` trên máy ảo. VMware Shared Folders **chưa chạy được** (`/mnt/hgfs` trống sau `vmhgfs-fuse`; chưa thử `vmware-hgfsclient` / kiểm tra VM → Settings → Options → Shared Folders → Always enabled + tick Enabled). Cách thay thế: kéo thả file ra Windows, hoặc tải lên Google Drive bằng Firefox trong máy ảo.
+2. ✅ (05/11) Đã đưa lên repo `runs/pilot/` (PR #9). ~~**Gửi `runs_pilot.tgz` cho Tuyến**~~ — file đã nằm ở `~/Desktop/runs_pilot.tgz` trên máy ảo. VMware Shared Folders **chưa chạy được** (`/mnt/hgfs` trống sau `vmhgfs-fuse`; chưa thử `vmware-hgfsclient` / kiểm tra VM → Settings → Options → Shared Folders → Always enabled + tick Enabled). Cách thay thế: kéo thả file ra Windows, hoặc tải lên Google Drive bằng Firefox trong máy ảo.
 3. ✅ (26/10) Tuyến đã có parser/KPI + `convert_runner_log.py` trên `main` (PR #5, #6) — còn chờ chạy thử trên log pilot thật.
 4. ✅ Tuyến đã vào repo (tài khoản `NTuyen999`).
 5. **D1 tên đề tài** — hỏi GVHD.
@@ -41,6 +47,9 @@
 - Trước khi sửa, `fetch` + `merge --ff-only origin/main` vì Tùng hay merge PR trên GitHub.
 - Các file `doan.md`, `phanbien_nangcap.md`, `phantich.md` nằm trực tiếp trong `Downloads\` (và `Downloads\thanhtruc\phantich.md`) là **bản cũ, lỗi thời** — chỉ dùng bản trong repo.
 - Thư mục `Downloads\thanhtruc` là repo thiệp 20/10, **không liên quan** đồ án.
+- Lấy file/chạy lệnh trong VM Ubuntu từ Windows (không cần mạng VM): `D:\vmrun.exe -T ws -gu tung -gp <mật khẩu, hỏi Tùng> CopyFileFromGuestToHost|CopyFileFromHostToGuest|runProgramInGuest "C:\Users\Administrator\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx" ...` — VM phải đang bật, VMware Tools chạy. **Không ghi mật khẩu vào repo (repo public).**
+- Mạng VM: adapter của VM Ubuntu để mặc định Bridged (qua Wi-Fi không nhận IP) → muốn có Internet thì VM → Settings → Network Adapter → **NAT**. Gateway VMnet8 = 10.0.125.2 (đã sửa 05/11; trước đó trùng IP host .1).
+- Windows không có Linux để thử script (WSL chỉ có `docker-desktop`, Docker thường tắt) → kiểm thử script bash/`select()` phải làm trong VM.
 
 ### Khối đính chính (ưu tiên hơn phần thân bên dưới)
 > - Công cụ ntp5-exp hạ về v4 khi **> 8 lượt mất liên tiếp** và nâng lại v5 ngay; **không có** cơ chế "chờ 256 request". Quy tắc "mất 2 → v4, chờ 256" của draft chưa đối chiếu nguyên văn.
