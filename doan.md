@@ -1,7 +1,7 @@
 # Sổ theo dõi Đồ án: Đánh giá hiệu năng NTPv5
 
 > **Người dùng chung:** Tùng (P2) và Tuyến (P1).
-> **Cập nhật lần cuối:** 26/10/2026 (Tuyến — cập nhật tiến độ P1; giữ nguyên phạm vi A0).
+> **Cập nhật lần cuối:** 05/11/2026 (Tùng — dữ liệu pilot lên repo, sửa runner 120 request; giữ nguyên phạm vi A0).
 > File gồm 2 phần: **Phần A — Đọc nhanh** (dễ hiểu, đọc trước) và **Phần B — Chi tiết** (chính xác, dùng khi làm thí nghiệm và viết báo cáo).
 > Phần A chỉ tóm tắt Phần B. Khi hai phần khác nhau, **Phần B đúng** → sửa lại Phần A.
 
@@ -80,15 +80,15 @@ S1–S4 cùng tổng trễ trung bình 50 ms → mỗi cặp chỉ khác **một
 - ✅ **P1/Tuyến:** Ubuntu VirtualBox 26.04.1, Python/Git và `ntp5-exp` chạy; đã kiểm tra cả M1–M4 trên localhost, **268 mẫu** (M1 33, M2 27, M3 12, M4 196). Bộ này chỉ để thử chức năng, **không trộn vào kết quả NetEm**.
 - ✅ **P1/Tuyến:** Đã tạo `parse_log.py`, `parse_runs.py`, `capture_timed.py`, `parse_timed.py`, `parse_timed_v2.py`, `analyze_runs.py`; xuất samples/metadata CSV, tính thử bias/MAE/P95/delay. `parse_timed_v2.py` vượt qua thử giả lập mất phản hồi và ranh giới WARMUP→MEASURE, **chưa được xác minh đầy đủ với phản hồi trễ/Interleaved trên NetEm thật**.
 - ✅ **GitHub:** Sáu file Python đã vào `main` qua [PR #5](https://github.com/Grant-Tung/DoAnDanhGiaHieuNang/pull/5) ngày 26/10. Hai script `config_scenario.sh` và `run_matrix.sh` của Tùng cũng có trên `main`.
-- 🟡 **Đang tích hợp:** `convert_runner_log.py` (chuyển log epoch của Tùng sang `[elapsed] [WARMUP/MEASURE]`) đã kiểm tra cú pháp và `--help`; ở nhánh `Tuyen-integration`, **chưa chứng minh xử lý chính xác dữ liệu pilot NetEm của Tùng**.
+- 🟡 **Đang tích hợp:** `convert_runner_log.py` (chuyển log epoch của Tùng sang `[elapsed] [WARMUP/MEASURE]`) đã kiểm tra cú pháp và `--help`; đã lên `main` (PR #6), **chưa chứng minh xử lý chính xác dữ liệu pilot NetEm của Tùng**.
 - ⬜ **Chưa có bằng chứng hoàn tất:** QA đầu-cuối trên dữ liệu `runs/pilot/` của Tùng, xác nhận cách ghép request–response/Interleaved và đúng 120 request giai đoạn đo, phân tích 100 run S0–S4, biểu đồ và báo cáo cuối.
 
 | Bước gần nhất | Việc | Ai | Điều kiện nghiệm thu |
 |---|---|---|---|
-| 1 | Bàn giao **một run S0/M4** từ pilot 24/10 (client/server log, `metadata.csv`, qdisc và PCAP nếu có) | Tùng | Tệp có sẵn để P1 phân tích, mã commit rõ |
+| 1 | ✅ (05/11) Bàn giao pilot 24/10: **cả 8 run** (log, `metadata.csv`, `plan.csv`, qdisc, PCAP) ở `runs/pilot/` trên repo (PR #9) | Tùng | Tệp có sẵn để P1 phân tích, mã commit rõ |
 | 2 | Tích hợp định dạng log epoch → timed và chạy parser/KPI trên run S0/M4 thật | Tuyến | CSV & KPI hợp lệ, khớp log và metadata gốc |
 | 3 | Kiểm tra một run S4, sau đó S3 (mất gói), xác thực request/response và timestamp Interleaved | Cả hai | S4 bias gần −15 ms; mất gói được hạch toán đúng |
-| 4 | Sửa/kiểm tra runner: đường dẫn `ntpnode.py`, commit nguồn, warm-up và **120 request MEASURE** | Cả hai | Một run khởi động/kết thúc sạch, metadata đầy đủ |
+| 4 | 🟡 (05/11) Runner đã sửa: dừng theo **120 request MEASURE** sau 60 s warm-up, kiểm tra số đếm trước khi ghi `ok` (B-10.1). ⬜ Chạy thử `sudo ./run_matrix.sh test` (1 run S0/M4) trên VM | Tùng | `runs/test/metadata.csv`: `measure_requests=120`, `measure_valid=120`, `ok` |
 | 5 | Chỉ khi tích hợp đạt mới duyệt/tiếp tục ma trận **100 run** theo A0 | Tùng | 100 run có QA, lưu lỗi và khả năng tái lập |
 | 6 | KPI tổng hợp theo *run*, biểu đồ, Ch.2–4 và báo cáo | Tuyến + Tùng | Trả lời RQ1–RQ4 bằng dữ liệu NetEm |
 
@@ -639,9 +639,11 @@ Quy tắc: **bỏ 60 s đầu** mỗi run (chờ đủ refids + lượt Interlea
 
 **Định dạng output của runner `scripts/run_matrix.sh` (Tuyến viết `parse_log.py` theo đây):**
 ```
-runs/<pilot|main>/
+runs/<test|pilot|main>/
 ├── plan.csv          # run_id,block,order,rep,scenario,mode (thứ tự đã xáo trộn)
-├── metadata.csv      # 1 dòng/run: ... requests_sent, responses_received, valid_samples, interleaved_samples, status
+├── metadata.csv      # 1 dòng/run: ... requests_sent, responses_received, valid_samples, interleaved_samples,
+│                     #   warmup_requests, measure_requests, measure_responses, measure_valid, measure_interleaved, status
+│                     #   (5 cột measure_* có từ runner 05/11; runs/pilot là runner cũ, không có)
 └── <run_id>/         # ví dụ main-b2-07_S3_M4
     ├── client.log    # MỖI DÒNG có thời gian epoch ở đầu: "1761300000.123456   Basic mode offset=+0.000057 delay=..."
     ├── server.log
@@ -652,6 +654,11 @@ runs/<pilot|main>/
 - Warm-up: dòng có `epoch − epoch dòng đầu tiên < 60` → `in_warmup = true` (không xoá).
 - Đếm request phải dùng dòng `Sent NTPv` trong `client.log`, không dùng PCAP (gói mất ở chiều đi không có trong PCAP).
 - Thư mục `<run_id>.loi.<số>` = lần chạy lỗi, giữ lại để truy vết.
+- **Runner từ 05/11/2026** (trước đó: client chạy cố định 300 s → chu kỳ thật ~2,02 s nên pilot chỉ có 149 request, **119** sau warm-up):
+  - Mốc warm-up = dòng `Sent NTPv` đầu tiên; request có `epoch − mốc < 60` là WARMUP, còn lại MEASURE. Response/mẫu tính theo pha của **request gần nhất** (giống `parse_timed_v2.py`).
+  - Client bị dừng ngay sau request MEASURE thứ **120** + 1,5 s chờ response; timeout 420 s chỉ là chốt an toàn.
+  - `status=ok` khi: `measure_requests = 120`; `measure_responses ≤ measure_requests`; `0 < measure_valid ≤ measure_responses`; mọi kịch bản **trừ S3** phải `measure_valid = 120` (S3 có mất gói nên được thiếu).
+  - `sudo ./run_matrix.sh test` = 1 run S0/M4 → `runs/test/`, dùng để kiểm thử runner.
 - ⚠️ Máy Tùng dùng locale số tiếng Việt (dấu phẩy thập phân): `awk`/`printf`/`sort -n` trong shell đọc sai `+0.000057` thành 0. **Luôn thêm `LC_ALL=C`** trước các lệnh này. Python không bị ảnh hưởng.
 
 **Cập nhật tích hợp P1 (26/10/2026):** `parse_timed_v2.py` hiện đọc `[elapsed] [WARMUP/MEASURE]`, trong khi `run_matrix.sh` đang ghi mỗi dòng `client.log` bằng Unix epoch. `convert_runner_log.py` tại nhánh `Tuyen-integration` dùng request đầu tiên làm mốc thời gian, đã kiểm tra cú pháp nhưng **chưa thử với log NetEm thật**. Không dùng trực tiếp định dạng `client.log` epoch cho parser V2. Khi mất gói/response trễ, cách gắn kết response với request trước đó vẫn cần kiểm tra bằng log/PCAP; KPI `valid_ratio` hiện mới kiểm tra bằng các ca đơn giản. Runner cũng cần xác minh 120 request **sau warm-up**, thay vì suy từ thời gian chạy cố định.
@@ -775,7 +782,7 @@ runs/<pilot|main>/
 | Q7 | Chuyển card Wi-Fi vào namespace được không? | Thử `iw phy ... set netns` | Tùng | ⬜ |
 | Q8 | Chrony trên máy lab có hỗ trợ NTPv5? | Tài liệu chrony | Tùng | ⬜ |
 | Q13 | Log epoch của runner đã chuyển đúng sang timed và QA với pilot thật chưa? | Kiểm tra một run S0/M4, sau đó S4/S3, đối chiếu PCAP/metadata | Tuyến + Tùng | ⬜ chưa kiểm chứng |
-| Q14 | Runner đã đếm đúng 120 request **sau** 60 s warm-up, thay vì dừng theo 300 s cố định chưa? | Đối chiếu log sent/response theo từng run | Tùng + Tuyến | ⬜ chưa xác nhận |
+| Q14 | Runner đã đếm đúng 120 request **sau** 60 s warm-up, thay vì dừng theo 300 s cố định chưa? | Đối chiếu log sent/response theo từng run | Tùng + Tuyến | 🟡 05/11 đã sửa runner (B-10.1); chờ chạy `test` trên VM |
 
 
 ---
@@ -841,6 +848,7 @@ sudo ip netns exec ntp-s tcpdump -i veth-s -w run.pcap udp port 10123
 sudo ip netns exec ntp-s tcpdump -i veth-s -X udp port 10123            # xem nội dung gói
 
 # Runner (chạy trong ~/Desktop/ntp5-exp)
+sudo ./run_matrix.sh test         # 1 run S0/M4, ~5 phút — kiểm thử runner trước khi chạy main
 sudo ./run_matrix.sh pilot        # 8 run, ~42 phút
 sudo ./run_matrix.sh main         # 100 run, ~8 giờ 40; bị ngắt → chạy lại đúng lệnh này
 
@@ -876,3 +884,4 @@ Lỗi thường gặp:
 | 24/10/2026 | Tùng (+AI) | Pilot đạt (S4 −15,0 ms, 8/8 ok); T15–T17 ✅; cheat sheet thêm lệnh runner + kiểm tra nhanh |
 | 24/10/2026 | Tùng (+AI) | Thêm `hoc_doan.md` (bản đồ học 12 bài + prompt gia sư). Đóng phiên AI: việc dở dang ghi ở `phantich.md` khối bàn giao (chạy 100 run, gửi pilot cho Tuyến, mời Tuyến vào repo, parse_log.py, tên đề tài) |
 | 26/10/2026 | Tuyến (+AI) | Cập nhật P1: chạy M1–M4 localhost (268 mẫu), parser timed V2 và KPI bản thử; 6 script Python đã merge qua PR #5. Ghi rõ khác định dạng log runner/parser, converter trên nhánh tích hợp, yêu cầu QA pilot thật trước ma trận 100 run. Không thay đổi A0. |
+| 05/11/2026 | Tùng (+AI) | Đưa dữ liệu pilot 24/10 lên repo `runs/pilot/` (PR #9) cho Tuyến. Sửa `run_matrix.sh` theo yêu cầu Tuyến: dừng theo 120 request MEASURE, kiểm tra số đếm trước khi `ok`, thêm 5 cột measure_*, thêm pha `test` (B-10.1, Q14). **Chưa chạy thử trên VM.** |
