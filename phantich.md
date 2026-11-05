@@ -27,6 +27,21 @@
 - ⏭️ **Việc tiếp theo:** Tùng bàn giao một run S0/M4 đã có từ pilot → Tuyến chuyển log/parse/KPI và đối chiếu metadata; kế đến kiểm tra S4, S3 (mất gói), khắc phục các khác biệt runner/parser → mới chạy/tiếp tục ma trận 100 run. Không bổ sung kịch bản mới.
 - ⚠️ Locale máy Tùng: cần `LC_ALL=C` khi dùng lệnh shell xử lý số thập phân.
 
+### Việc dở dang khi đóng phiên 24/10/2026 (hỏi người dùng tình trạng trước khi làm tiếp)
+1. **Chạy 100 run** `sudo ./run_matrix.sh main` trên máy ảo — chưa xác nhận đã bắt đầu/xong. Kiểm tra: `grep -c ',ok$' runs/main/metadata.csv` phải = 100; rồi chạy lệnh "Kiểm tra nhanh" ở `doan.md` mục 18.
+2. **Gửi `runs_pilot.tgz` cho Tuyến** — file đã nằm ở `~/Desktop/runs_pilot.tgz` trên máy ảo. VMware Shared Folders **chưa chạy được** (`/mnt/hgfs` trống sau `vmhgfs-fuse`; chưa thử `vmware-hgfsclient` / kiểm tra VM → Settings → Options → Shared Folders → Always enabled + tick Enabled). Cách thay thế: kéo thả file ra Windows, hoặc tải lên Google Drive bằng Firefox trong máy ảo.
+3. ✅ (26/10) Tuyến đã có parser/KPI + `convert_runner_log.py` trên `main` (PR #5, #6) — còn chờ chạy thử trên log pilot thật.
+4. ✅ Tuyến đã vào repo (tài khoản `NTuyen999`).
+5. **D1 tên đề tài** — hỏi GVHD.
+6. Tùng có thể bắt đầu viết Ch.3 và học theo `hoc_doan.md` trong lúc máy chạy.
+
+### Ghi chú kỹ thuật cho AI chạy trên máy Windows của Tùng (Claude Code)
+- Repo trên máy: `C:\Users\Administrator\Downloads\Đánh giá hiệu năng\DoAnDanhGiaHieuNang-main` (làm việc trên nhánh `Tung`, gộp vào `main` qua Pull Request do Tùng bấm merge).
+- `git push` thường bị lỗi vì chưa chạy `gh auth setup-git`; đẩy bằng: `git -c credential.helper= -c "credential.helper=!gh auth git-credential" push origin Tung` (tài khoản GitHub `Grant-Tung`).
+- Trước khi sửa, `fetch` + `merge --ff-only origin/main` vì Tùng hay merge PR trên GitHub.
+- Các file `doan.md`, `phanbien_nangcap.md`, `phantich.md` nằm trực tiếp trong `Downloads\` (và `Downloads\thanhtruc\phantich.md`) là **bản cũ, lỗi thời** — chỉ dùng bản trong repo.
+- Thư mục `Downloads\thanhtruc` là repo thiệp 20/10, **không liên quan** đồ án.
+
 ### Khối đính chính (ưu tiên hơn phần thân bên dưới)
 > - Công cụ ntp5-exp hạ về v4 khi **> 8 lượt mất liên tiếp** và nâng lại v5 ngay; **không có** cơ chế "chờ 256 request". Quy tắc "mất 2 → v4, chờ 256" của draft chưa đối chiếu nguyên văn.
 > - Man page tc-netem **không nói** jitter mặc định là phân phối đều → chưa kiểm chứng, phải đo.
