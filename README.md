@@ -12,14 +12,43 @@ Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & d�
 | `hoc_doan.md` | **Học đồ án**: bản đồ 12 bài + prompt cho AI gia sư | Tùng, Tuyến | Khi phạm vi/kết quả đồ án thay đổi |
 | `scripts/` | NetEm/runner (Tùng) và các script Python parser/KPI (Tuyến); một converter ở nhánh `Tuyen-integration` | Cả hai | Khi thay đổi công cụ, kiểm tra chạy và ghi rõ trạng thái nghiệm thu |
 
-## Tiến độ gần nhất (26/10/2026)
+## Scripts
+
+| Script | Vai trò | Trạng thái |
+|---|---|---|
+| `scripts/run_matrix.sh` | Runner chạy ma trận thí nghiệm | ✅ Dùng chính |
+| `scripts/config_scenario.sh` | Cấu hình NetEm S0–S4 | ✅ Dùng chính |
+| `scripts/convert_runner_log.py` | Chuyển `client.log` (epoch) → timed log (elapsed + WARMUP/MEASURE) | ✅ Dùng chính |
+| `scripts/parse_timed_v2.py` | Parser v2: đọc timed log → samples + metadata CSV | ✅ Dùng chính |
+| `scripts/analyze_runs.py` | Tính KPI cho 1 run từ samples + metadata | ✅ Dùng chính |
+| `scripts/batch_process.py` | **MỚI** — chạy pipeline cho tất cả run (đọc plan.csv, gộp kết quả) | ✅ Dùng chính |
+| `scripts/plot_kpi.py` | **MỚI** — vẽ 5 biểu đồ theo mục 10.3 doan.md | ✅ Dùng chính |
+| `scripts/capture_timed.py` | Chạy client localhost (dùng thử) | 🟡 Thử nghiệm |
+| `scripts/parse_timed.py` | ⚠️ **CŨ** — parser v1 (thư mục output cứng `~/ntpv5-project/results/parsed`). Dùng `parse_timed_v2.py` thay thế | ❌ Không dùng |
+| `scripts/parse_log.py` | ⚠️ **CŨ** — parser localhost cứng đường dẫn. Dùng `batch_process.py` thay thế | ❌ Không dùng |
+| `scripts/parse_runs.py` | ⚠️ **CŨ** — parser localhost v2, vẫn cứng `~/ntpv5-project/results/`. Dùng `batch_process.py` thay thế | ❌ Không dùng |
+
+## Tiến độ gần nhất (06/11/2026)
 
 - **Đã xác nhận:** Tùng có NetEm S0–S4 và pilot S0/S4 **8/8 run đạt** (24/10; xem `doan.md` mục 12). Tuyến kiểm thử localhost đủ M1–M4, 268 mẫu, tạo parser/metadata/KPI bản thử.
 - **GitHub:** Sáu script Python P1 đã được gộp vào `main` qua [PR #5](https://github.com/Grant-Tung/DoAnDanhGiaHieuNang/pull/5); shell runner/NetEm P2 cũng trên `main`.
-- **Chưa hoàn tất:** chuyển và phân tích log pilot NetEm thực tế bằng parser P1, kiểm chứng request/response khi mất gói, đúng 120 request sau warm-up, QA kết quả 100 run và báo cáo cuối.
-- **Tiếp theo:** Tùng bàn giao log S0/M4 từ pilot; Tuyến xác minh CSV/KPI, rồi kiểm tra S4/S3 trước khi xử lý ma trận chính.
+- **Mới thêm (06/11):** `batch_process.py` (pipeline tự động cho 100 run), `plot_kpi.py` (5 biểu đồ), sửa `analyze_runs.py` (MAE tính trên tất cả mẫu, bao gồm fallback).
+- **Tiếp theo:** Tùng chạy 100 run main, Tuyến chạy `batch_process.py --phase main` để xử lý và `plot_kpi.py --phase main` để vẽ biểu đồ.
 
 **Phạm vi đánh giá không đổi:** 4 mode (M1–M4), 5 kịch bản (S0–S4), 5 lần lặp = 100 run. Localhost và log giả lập chỉ dùng thử công cụ, không phải số liệu kết luận.
+
+## Chạy nhanh (sau khi có dữ liệu)
+
+```bash
+# 1. Xử lý tất cả run (convert → parse → analyze → gộp KPI)
+python scripts/batch_process.py --phase pilot   # hoặc main
+# → Output: runs/pilot/kpi_summary.csv, kpi_by_mode_scenario.csv
+
+# 2. Vẽ biểu đồ
+pip install matplotlib   # chỉ cần lần đầu
+python scripts/plot_kpi.py --phase pilot
+# → Output: runs/pilot/charts/chart1_*.png ... chart5_*.png
+```
 
 ## Vòng đời của một ý tưởng
 
