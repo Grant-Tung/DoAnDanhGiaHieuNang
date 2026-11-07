@@ -517,3 +517,11 @@ sudo ip netns exec ntp-s tcpdump -i veth-s -w run.pcap udp port 10123
 - [ ] Tuyến chạy converter → parser → KPI; đối chiếu request/response và 60 s warm-up. Kiểm tra tiếp S4 và S3.
 - [ ] Tùng/ Tuyến thống nhất runner: đường dẫn `ntpnode.py`, commit gốc, cách cắt đúng 120 request MEASURE; kiểm tra lại trên VM P2.
 - [ ] Khi QA đầu-cuối đạt: thu/QA 100 run, tổng hợp thống kê mỗi run, biểu đồ, viết báo cáo.
+
+### Phiên 2026-11-07 (Tùng + AI)
+- [QS] Chạy hoàn tất trọn vẹn 100/100 run ma trận chính trên máy ảo Ubuntu (run_matrix.sh main, 4 mode × 5 kịch bản × 5 lần lặp). Toàn bộ 100 run có status=ok.
+- [QS] Chuyển toàn bộ dữ liệu thô về máy Windows (ntp5-exp.zip, runs/main/).
+- [QS] Chạy tự động hóa trọn gói qua scripts/batch_process.py: convert (warm-up 60s) -> parse_v2 -> analyze_runs cho toàn bộ 100 run.
+- [QS] Xuất thành công runs/main/kpi_summary.csv (100 run) và runs/main/kpi_by_mode_scenario.csv (20 dòng trung bình mode × scenario).
+- [QS] Cài đặt matplotlib và chạy scripts/plot_kpi.py sinh đủ 5 biểu đồ khoa học theo Mục 10.3 vào runs/main/charts/.
+- [QS] Xác nhận 2 phát hiện cốt lõi: S4 bias = -15.01 ms (khớp 100% lý thuyết -15 ms); S3 chứng minh cơ chế fallback của Interleaved mode khi mất gói.
