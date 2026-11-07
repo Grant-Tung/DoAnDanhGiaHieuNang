@@ -28,12 +28,12 @@ Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & d�
 | `scripts/parse_log.py` | ⚠️ **CŨ** — parser localhost cứng đường dẫn. Dùng `batch_process.py` thay thế | ❌ Không dùng |
 | `scripts/parse_runs.py` | ⚠️ **CŨ** — parser localhost v2, vẫn cứng `~/ntpv5-project/results/`. Dùng `batch_process.py` thay thế | ❌ Không dùng |
 
-## Tiến độ gần nhất (06/11/2026)
+## Tiến độ gần nhất (07/11/2026)
 
-- **Đã xác nhận:** Tùng có NetEm S0–S4 và pilot S0/S4 **8/8 run đạt** (24/10; xem `doan.md` mục 12). Tuyến kiểm thử localhost đủ M1–M4, 268 mẫu, tạo parser/metadata/KPI bản thử.
-- **GitHub:** Sáu script Python P1 đã được gộp vào `main` qua [PR #5](https://github.com/Grant-Tung/DoAnDanhGiaHieuNang/pull/5); shell runner/NetEm P2 cũng trên `main`.
-- **Mới thêm (06/11):** `batch_process.py` (pipeline tự động cho 100 run), `plot_kpi.py` (5 biểu đồ), sửa `analyze_runs.py` (MAE tính trên tất cả mẫu, bao gồm fallback).
-- **Tiếp theo:** Tùng chạy 100 run main, Tuyến chạy `batch_process.py --phase main` để xử lý và `plot_kpi.py --phase main` để vẽ biểu đồ.
+- **ĐÃ HOÀN TẤT 100/100 RUN THỰC NGHIỆM:** Tùng đã hoàn tất chạy toàn bộ ma trận chính 100 run trên Ubuntu VMware (run_matrix.sh main, 4 mode x 5 kịch bản x 5 lần lặp, ~9 tiếng) với 100% status = ok.
+- **Pipeline tự động hóa hoàn tất:** `batch_process.py --phase main` đã xử lý 100 run (khử warm-up 60s, parse v2, analyze KPI), sinh thành công `runs/main/kpi_summary.csv` và `runs/main/kpi_by_mode_scenario.csv`.
+- **Đã sinh đủ 5 biểu đồ khoa học:** `plot_kpi.py --phase main` đã vẽ và lưu 5 biểu đồ tại `runs/main/charts/` theo đúng đề cương mục 10.3.
+- **Bàn giao GitHub:** Đã tạo [PR #13](https://github.com/Grant-Tung/DoAnDanhGiaHieuNang/pull/13) gộp toàn bộ kết quả KPI và biểu đồ vào `main`. Toàn bộ dữ liệu và phân tích sẵn sàng 100% để Tuyến dán vào Chương 4 báo cáo.
 
 **Phạm vi đánh giá không đổi:** 4 mode (M1–M4), 5 kịch bản (S0–S4), 5 lần lặp = 100 run. Localhost và log giả lập chỉ dùng thử công cụ, không phải số liệu kết luận.
 
