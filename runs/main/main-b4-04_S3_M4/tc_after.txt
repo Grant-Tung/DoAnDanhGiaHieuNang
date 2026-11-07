@@ -1,0 +1,6 @@
+qdisc netem 8067: root refcnt 129 limit 1000 delay 25ms  10ms loss 5%
+ Sent 34014 bytes 167 pkt (dropped 5, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc netem 8068: root refcnt 129 limit 1000 delay 25ms  10ms loss 5%
+ Sent 32238 bytes 159 pkt (dropped 8, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
