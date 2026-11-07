@@ -37,6 +37,33 @@ Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & d�
 
 **Phạm vi đánh giá không đổi:** 4 mode (M1–M4), 5 kịch bản (S0–S4), 5 lần lặp = 100 run. Localhost và log giả lập chỉ dùng thử công cụ, không phải số liệu kết luận.
 
+## Dữ liệu đối chiếu & Xác minh chất lượng (QA Verification cho Tuyến)
+
+Để phục vụ đối chiếu và nghiệm thu trước khi đưa số liệu vào Chương 4:
+1. **Thông tin Runner đã chạy 100 run:**
+   - Script chạy: 
+un_matrix.sh (chạy timeout cố định CLIENT_SECS=310s).
+   - Mã băm SHA-256: 2B2C03FF56E08E1F374E7D2B86EA63551F2332E954D50A632FBC9C20D0744FC8.
+   - Tool commit: e19210790b2a1cbd951e3e5066dca094dd62a52 (draft-09+ của Miroslav Lichvar).
+   - Cơ chế mẫu: 310s gửi ~154 request; trừ 60s warm-up (30 request đầu) -> 99 run có đúng **124 request MEASURE** chuẩn.
+2. **Giải trình run main-b3-08_S3_M1 (96 request MEASURE):**
+   - Vô tình bị dừng sớm bằng Ctrl+C lúc 03:42 sáng ở giây thứ ~250.
+   - Gửi được 126 request, trừ 30 warm-up còn 96 request MEASURE (nhận 88 response, tỷ lệ nhận 91.7%, đúng 5% loss).
+   - Runner cũ gán STATUS=ok khi VALID > 0 (118 mẫu > 0) nên metadata ghi ok.
+3. **Các tệp đối chiếu đã đưa lên Git:**
+   - Tệp nén tổng hợp: 
+uns_verification_for_Tuyen.zip (148 KB).
+   - 3 thư mục run đối chiếu đầy đủ log & PCAP trong 
+uns/main/:
+     + 
+uns/main/main-b3-08_S3_M1/: Run S3/M1 96 request.
+     + 
+uns/main/main-b1-02_S3_M2/: Run S3/M2 kiểm chứng Interleaved NTPv4 khi mất gói.
+     + 
+uns/main/main-b1-13_S3_M4/: Run S3/M4 kiểm chứng Interleaved NTPv5 khi mất gói.
+   - Toàn bộ 100 run log thô có sẵn trong 
+tp5-exp.zip.
+
 ## Chạy nhanh (sau khi có dữ liệu)
 
 ```bash
