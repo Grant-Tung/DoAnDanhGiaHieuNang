@@ -15,22 +15,26 @@
    - Nếu có kiến thức mới quan trọng cho AI sau → cập nhật khối bàn giao này.
 5. **Repo:** https://github.com/Grant-Tung/DoAnDanhGiaHieuNang (trang repo hiện hiển thị Public). Nhánh `main` = bản thống nhất; `Tung`, `Tuyen` = nhánh cá nhân; gộp qua Pull Request.
 
-### Cập nhật 05/11/2026 (Tùng + AI) — ưu tiên hơn các dòng 26/10 bên dưới
-- ✅ [QS] Dữ liệu pilot 24/10 (8 run, có PCAP) đã ở `runs/pilot/` trên `main` (PR #9) → Tuyến `git pull` là có, không cần gửi ZIP.
-- ✅ [QS] `convert_runner_log.py` đã ở `main` (PR #6), không còn chỉ ở nhánh `Tuyen-integration`.
-- 🟡 [CKC] `scripts/run_matrix.sh` đã sửa theo yêu cầu Tuyến (dừng theo 120 request MEASURE, kiểm tra số đếm trước `ok`, cột measure_*, pha `test`) — chi tiết `doan.md` B-10.1. **Chưa chạy trên VM.** Việc kế: chép runner vào `~/Desktop/ntp5-exp/` → `sudo ./run_matrix.sh test` → kiểm tra `runs/test/metadata.csv` → báo Tuyến → rồi mới `main`.
-- Học (`hoc_doan.md`): Tùng xong M0–M4.3, đang ở M4.4 (mất gói và Interleaved).
-
-### Trạng thái hiện tại (cập nhật 26/10/2026)
+### Cập nhật 06/11/2026 (Tuyến + Tùng) — Trạng thái hiện tại
 - 🔒 **Phạm vi không đổi:** theo `doan.md` A0: M1–M4 × S0–S4 × 5 lặp = **100 run**, 60 s warm-up, `-i 1`, mục tiêu 120 request/MEASURE; phần nâng cao chỉ sau khi xong ma trận chính.
-- ✅ [QS] **Tùng/P2:** Ubuntu VMware, 2 namespace/veth, NetEm và kiểm chứng ping S0–S4; runner `scripts/run_matrix.sh` có trên `main`; **pilot ngày 24/10 S0/S4 đạt 8/8 run**, S4 bias gần **−15,0 ms**. Xem số liệu tại `doan.md` B-12. **Không nhầm pilot với 100 run chính thức.**
-- ✅ [QS] **Tuyến/P1:** Ubuntu 26.04.1 trên VirtualBox; commit `ntp5-exp` `fe19210790b2a1cbd951e3e5066dca094dd62a52`; chạy **đủ M1–M4 localhost với 268 mẫu** (M1 33; M2 27 với 26 Interleaved; M3 12; M4 196 với 195 Interleaved). Chỉ là smoke test.
-- ✅ [QS] P1 đã tạo script parser, CSV samples/metadata, timed logging, phân biệt WARMUP/MEASURE, KPI bias/MAE/P95/delay. Parser V2 qua hai ca **log giả lập** (mất 1 response; response vượt ranh giới warm-up), và chạy được log M4 localhost thật (44 mẫu sau warm-up). Đây chưa phải kiểm định NetEm thực tế.
-- ✅ [GitHub] PR [#5](https://github.com/Grant-Tung/DoAnDanhGiaHieuNang/pull/5) đã merged 6 chương trình Python P1 vào nhánh `main` ngày 26/10; script shell P2 cũng có trên `main`.
-- 🟡 [CKC] `scripts/convert_runner_log.py` đang ở nhánh `Tuyen-integration`, đã qua `py_compile`/`--help` nhưng chưa được chạy với `runs/pilot/.../client.log`. Runner gắn **epoch** ở đầu dòng; parser V2 đòi `[elapsed] [WARMUP/MEASURE]`.
-- ⚠️ [CKC] Chưa xác minh ghép response trễ và timestamp Interleaved trong kịch bản mất gói; cần kiểm tra cách đếm đúng **120 request ở MEASURE** và nguồn commit thực nghiệm khi chạy từ repo nhóm. Bản runner hiện tại dùng thời gian cố định 300 s; không được xem điều này tự động bằng 120 request đo hợp lệ.
-- ⬜ [CKC] Chưa có bằng chứng trong dữ liệu được bàn giao rằng **100 run chính thức** đã hoàn thành; cũng chưa có bộ biểu đồ/KPI chính thức từ S0–S4. Không suy đoán tiến độ trên máy Tùng chưa xem.
-- ⏭️ **Việc tiếp theo:** Tùng bàn giao một run S0/M4 đã có từ pilot → Tuyến chuyển log/parse/KPI và đối chiếu metadata; kế đến kiểm tra S4, S3 (mất gói), khắc phục các khác biệt runner/parser → mới chạy/tiếp tục ma trận 100 run. Không bổ sung kịch bản mới.
+- ✅ [QS] **Tùng/P2:** Ubuntu VMware, 2 namespace/veth, NetEm và kiểm chứng ping S0–S4; runner `scripts/run_matrix.sh` có trên `main`; **pilot S0/S4 đạt 8/8 run**, S4 bias gần **−15,0 ms**. Runner đã sửa theo controller chính xác 120 request MEASURE sau 60s warm-up.
+- ✅ [QS] **Tuyến/P1 & Tích hợp:** Đã kiểm chứng đầu-cuối pipeline trên toàn bộ **8/8 run pilot thật** (`runs/pilot/`): chuỗi `convert_runner_log.py` → `parse_timed_v2.py` → `analyze_runs.py` chạy đạt 100%, không lỗi, xuất KPI chuẩn xác.
+- ✅ [MÃ] **Tự động hóa hoàn tất:**
+  - `scripts/batch_process.py`: Tự động đọc `plan.csv` xử lý toàn bộ 100 run, xuất `kpi_summary.csv` và bảng trung bình `kpi_by_mode_scenario.csv`.
+  - `scripts/plot_kpi.py`: Vẽ sẵn đầy đủ 5 biểu đồ theo mục 10.3 `doan.md`.
+  - `scripts/setup_lab.sh`: Script 1 lệnh dựng lại 2 network namespace sau khi restart VM.
+  - `scripts/analyze_runs.py`: Đã sửa cách tính MAE/P95 trên **tất cả** mẫu đo sau warm-up (tính cả fallback Interleaved → Basic), báo cáo song song `mae_matched_ms`.
+  - Quy ước warm-up mục 10.1 `doan.md` đã đồng bộ: mốc tính từ NTP request đầu tiên (`Sent NTPv`).
+- 🟡 [CKC] **Bước tiếp theo:** Tùng chạy 100 run chính thức trên máy ảo (`sudo ./run_matrix.sh main`). Sau khi hoàn thành, chỉ cần chạy 2 lệnh `python scripts/batch_process.py --phase main` và `python scripts/plot_kpi.py --phase main` là có đầy đủ số liệu và biểu đồ báo cáo.
+- 🔒 **Phạm vi không đổi:** theo `doan.md` A0: M1–M4 × S0–S4 × 5 lặp = **100 run**, 60 s warm-up, `-i 1`, mục tiêu 120 request/MEASURE; phần nâng cao chỉ sau khi xong ma trận chính.
+- ✅ [QS] **Tùng/P2:** Ubuntu VMware, 2 namespace/veth, NetEm và kiểm chứng ping S0–S4; runner `scripts/run_matrix.sh` có trên `main`; **pilot S0/S4 đạt 8/8 run**, S4 bias gần **−15,0 ms**. Runner đã được sửa nâng `CLIENT_SECS=310` và `SERVER_SECS=320` để đảm bảo đo đủ >= 120 request.
+- ✅ [QS] **Tuyến/P1 & Tích hợp:** Đã kiểm chứng đầu-cuối pipeline trên toàn bộ **8/8 run pilot thật** (`runs/pilot/`): chuỗi `convert_runner_log.py` -> `parse_timed_v2.py` -> `analyze_runs.py` chạy đạt 100%, không lỗi, xuất KPI chuẩn xác.
+- ✅ [MÃ] **Tự động hóa hoàn tất:**
+  - `scripts/batch_process.py`: Tự động đọc `plan.csv` xử lý toàn bộ 100 run, xuất `kpi_summary.csv` và bảng trung bình `kpi_by_mode_scenario.csv`.
+  - `scripts/plot_kpi.py`: Vẽ sẵn đầy đủ 5 biểu đồ theo mục 10.3 `doan.md`.
+  - `scripts/analyze_runs.py`: Đã sửa cách tính MAE/P95 trên **tất cả** mẫu đo sau warm-up (tính cả fallback Interleaved -> Basic), báo cáo song song `mae_matched_ms`.
+  - Quy ước warm-up mục 10.1 `doan.md` đã đồng bộ: mốc tính từ NTP request đầu tiên (`Sent NTPv`).
+- 🟡 [CKC] **Bước tiếp theo:** Tùng chạy 100 run chính thức trên máy ảo (`sudo ./run_matrix.sh main`). Sau khi hoàn thành, chỉ cần chạy 2 lệnh `python scripts/batch_process.py --phase main` và `python scripts/plot_kpi.py --phase main` là có đầy đủ số liệu và biểu đồ báo cáo.
 - ⚠️ Locale máy Tùng: cần `LC_ALL=C` khi dùng lệnh shell xử lý số thập phân.
 
 ### Việc dở dang khi đóng phiên 24/10/2026 (hỏi người dùng tình trạng trước khi làm tiếp)

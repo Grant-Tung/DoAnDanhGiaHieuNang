@@ -2,6 +2,7 @@
 # run_matrix.sh — chạy ma trận thí nghiệm NTPv4/NTPv5 (đồ án đánh giá hiệu năng)
 # Đặt cùng thư mục với ntpnode.py và config_scenario.sh.
 # Dùng: sudo ./run_matrix.sh test    (S0 × M4 × 1 lặp = 1 run, ~5 phút — kiểm thử runner)
+#       sudo ./run_matrix.sh s3      (4 mode × S3 × 1 lặp = 4 run, ~22 phút — pilot mất gói)
 #       sudo ./run_matrix.sh pilot   (4 mode × S0,S4 × 1 lặp = 8 run, ~42 phút)
 #       sudo ./run_matrix.sh main    (4 mode × S0–S4 × 5 lặp = 100 run, ~9 giờ)
 # Bị ngắt giữa chừng → chạy lại đúng lệnh cũ: run đã "ok" được bỏ qua.
@@ -9,7 +10,7 @@ set -u
 cd "$(dirname "$0")"
 
 PHASE="${1:-}"
-case "$PHASE" in test|pilot|main) ;; *) echo "Dùng: sudo $0 test|pilot|main"; exit 1;; esac
+case "$PHASE" in test|s3|pilot|main) ;; *) echo "Dùng: sudo $0 test|s3|pilot|main"; exit 1;; esac
 [ "$EUID" -eq 0 ] || { echo "Phải chạy bằng sudo: sudo $0 $PHASE"; exit 1; }
 
 POLL=1            # -i 1 → hỏi ~2,02 s/lần (đo ở pilot)
@@ -35,7 +36,7 @@ if [ ! -f "$PLAN" ]; then
 import random, sys
 phase = sys.argv[1]
 modes = ["M4"] if phase == "test" else ["M1", "M2", "M3", "M4"]
-scens, reps = {"test": (["S0"], 1), "pilot": (["S0", "S4"], 1)}.get(phase, (["S0", "S1", "S2", "S3", "S4"], 5))
+scens, reps = {"test": (["S0"], 1), "s3": (["S3"], 1), "pilot": (["S0", "S4"], 1)}.get(phase, (["S0", "S1", "S2", "S3", "S4"], 5))
 print("run_id,block,order,rep,scenario,mode")
 for rep in range(1, reps + 1):
     cells = [(s, m) for s in scens for m in modes]
