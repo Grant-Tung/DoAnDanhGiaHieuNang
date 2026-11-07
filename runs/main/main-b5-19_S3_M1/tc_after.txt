@@ -1,0 +1,6 @@
+qdisc netem 809d: root refcnt 129 limit 1000 delay 25ms  10ms loss 5%
+ Sent 13842 bytes 165 pkt (dropped 10, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc netem 809e: root refcnt 129 limit 1000 delay 25ms  10ms loss 5%
+ Sent 13212 bytes 158 pkt (dropped 7, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0

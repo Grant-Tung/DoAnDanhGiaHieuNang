@@ -1,0 +1,6 @@
+qdisc netem 8051: root refcnt 129 limit 1000 delay 10ms
+ Sent 34986 bytes 173 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc netem 8052: root refcnt 129 limit 1000 delay 40ms
+ Sent 34986 bytes 173 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
