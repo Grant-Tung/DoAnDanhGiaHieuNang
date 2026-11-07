@@ -695,10 +695,10 @@ runs/<test|pilot|main>/
 | T11 | Kiểm chứng qdisc + ping S0–S4 | Tùng | ✅ 24/10 | Đạt (ping-01); S3 đo lại 500 gói |
 | T12–T14 | Pipeline timed + KPI cấp run (P1) | Tuyến | 🟡 bản thử 26/10 | `capture_timed.py`, parser V1/V2, `analyze_runs.py`; thử mất gói/rìa warm-up; chờ tích hợp runner P2 |
 | T15–T17 | Runner + pilot (S0, S4) | Tùng | ✅ 24/10 | 8/8 ok; S4 −15,0 ms |
-| T18 | Ma trận chính 100 run (4 mode × 5 KB × 5 lặp) | Tùng | ⬜ chưa xác nhận hoàn tất | Không có số liệu 100 run được bàn giao; cần qua nghiệm thu tích hợp |
+| T18 | Ma trận chính 100 run (4 mode × 5 KB × 5 lặp) | Tùng | ✅ | Đã chạy xong 100/100 run ok trên Ubuntu, chuyển về Windows |
 | T19–T20 | QA dữ liệu + PCAP | Tuyến | ⬜ chưa thực hiện trên dữ liệu chính | Kiểm tra đối chiếu request/response, warm-up, kích thước gói và Interleaved |
 | T21 | *(tuỳ chọn)* Chèn trễ xử lý phía server | Cả hai | ⬜ | Chỉ sau T18 + có biểu đồ chính |
-| T22–T24 | KPI, biểu đồ, Ch.2 & Ch.4 | Tuyến | 🟡 KPI bản thử; chưa có kết quả chính thức | Đã tính KPI localhost; cần dữ liệu S0–S4 và tổng hợp mỗi run |
+| T22–T24 | KPI, biểu đồ, Ch.2 & Ch.4 | Cả hai | ✅ | Đã batch_process 100 run, sinh kpi_summary.csv, kpi_by_mode_scenario.csv và 5 biểu đồ PNG |
 | T25–T26 | Ch.3, chạy lại run lỗi | Tùng | ⬜ | |
 | T27–T30 | Báo cáo, slide, demo, đóng gói mã | Cả hai | ⬜ | |
 | — | Máy thật (Wi-Fi, HW timestamp) | — | ❌ | Ngoài phạm vi → Hướng phát triển |
@@ -717,7 +717,7 @@ runs/<test|pilot|main>/
 | 24/10/2026 | ping-02 | S3 | ping 500 gói | ~100 s | Tùng | mất **10,2%**; RTT 31,6/50,5/69,6, sd 8,3 | Đạt (lý thuyết 9,75%). `checks/ping_S3_500.txt` |
 | 24/10/2026 | mode-01 | S0 | M1–M4, `-i 1`, 40 s/mode | ~3 phút | Tùng | Mỗi mode 20 mẫu; `-v 4 -x` và `-v 5 -x` có 19 Interleaved (mẫu đầu Basic) | **M2 chạy được.** Quan sát: S0 offset ±0,04–0,38 ms, delay 0,38–1,7 ms → nhiễu nền (VM + Python) lớn hơn dự đoán "vài chục µs"; theo dõi trong 100 run. `checks/mode_*.log` |
 | 24/10/2026 | pilot | S0, S4 | M1–M4 × 1 lặp, runner | 14:13–14:54 | Tùng | 8/8 ok; 149 mẫu/run (119 sau warm-up); M2/M4: 148 Interleaved; sent = recv = 149 | **Pilot đạt.** Lệch trung bình sau warm-up: S4 = −15,011 (M2) · −15,016 (M1) · −14,990 (M4) · −15,027 (M3) ms (lý thuyết −15); S0 = −16 (M3) · +2 (M4) · +17 (M2) · +2 (M1) µs. Xác nhận chiều NetEm, dấu offset, runner, warm-up. Số pilot không dùng làm kết quả |
-| | | | | | | | |
+| 07/11/2026 | main | S0–S4 | M1–M4 × 5 lặp, runner | ~9 giờ | Tùng | 100/100 ok; 124 mẫu chuẩn/run; S4 lệch −15,01 ms (lý thuyết −15); S3 Interleaved fallback về Basic khi mất gói; sinh đủ 5 biểu đồ KPI | Hoàn tất 100/100 run, số liệu đã parse và biểu đồ đã sinh đủ |
 
 ---
 
