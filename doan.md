@@ -86,7 +86,7 @@ S1–S4 cùng tổng trễ trung bình 50 ms → mỗi cặp chỉ khác **một
 | Bước gần nhất | Việc | Ai | Điều kiện nghiệm thu |
 |---|---|---|---|
 | 1 | ✅ (05/11) Bàn giao pilot 24/10: **cả 8 run** (log, `metadata.csv`, `plan.csv`, qdisc, PCAP) ở `runs/pilot/` trên repo (PR #9) | Tùng | Tệp có sẵn để P1 phân tích, mã commit rõ |
-| 2 | Tích hợp định dạng log epoch → timed và chạy parser/KPI trên run S0/M4 thật | Tuyến | CSV & KPI hợp lệ, khớp log và metadata gốc |
+| 2 | Tích hợp định dạng log epoch → timed và chạy parser/KPI trên run S0/M4 thật | Tuyến | ✅ pipeline `batch_process.py` tự động (convert → parse_v2 → analyze); MAE tính trên tất cả mẫu bao gồm fallback |
 | 3 | Kiểm tra một run S4, sau đó S3 (mất gói), xác thực request/response và timestamp Interleaved | Cả hai | S4 bias gần −15 ms; mất gói được hạch toán đúng |
 | 4 | 🟡 (05/11) Runner đã sửa: dừng theo **120 request MEASURE** sau 60 s warm-up, kiểm tra số đếm trước khi ghi `ok` (B-10.1). ⬜ Chạy thử `sudo ./run_matrix.sh test` (1 run S0/M4) trên VM | Tùng | `runs/test/metadata.csv`: `measure_requests=120`, `measure_valid=120`, `ok` |
 | 5 | Chỉ khi tích hợp đạt mới duyệt/tiếp tục ma trận **100 run** theo A0 | Tùng | 100 run có QA, lưu lỗi và khả năng tái lập |
@@ -651,7 +651,7 @@ runs/<test|pilot|main>/
     ├── tc_before.txt
     └── tc_after.txt  # thống kê NetEm 2 chiều (sent / dropped) → loss quan sát được
 ```
-- Warm-up: dòng có `epoch − epoch dòng đầu tiên < 60` → `in_warmup = true` (không xoá).
+- Warm-up: `convert_runner_log.py` tính `elapsed = epoch − epoch_request_đầu_tiên`. Dòng có `elapsed < 60` → `in_warmup = true` (không xoá). **Mốc là request NTP đầu tiên** (dòng chứa `Sent NTPv`), không phải dòng log đầu tiên.
 - Đếm request phải dùng dòng `Sent NTPv` trong `client.log`, không dùng PCAP (gói mất ở chiều đi không có trong PCAP).
 - Thư mục `<run_id>.loi.<số>` = lần chạy lỗi, giữ lại để truy vết.
 - **Runner từ 05/11/2026** (trước đó: client chạy cố định 300 s → chu kỳ thật ~2,02 s nên pilot chỉ có 149 request, **119** sau warm-up):
@@ -688,7 +688,7 @@ runs/<test|pilot|main>/
 | T04 | Ubuntu 22.04.5 + công cụ + clone ntp5-exp | Tùng | ✅ | |
 | T05 | 2 namespace + veth, ping OK | Tùng | ✅ | |
 | T06 | Duyệt kịch bản | Cả hai | ✅ 24/10 | Chốt phạm vi A0 |
-| T07–T08 | Schema CSV & parser cơ bản (P1) | Tuyến | ✅ bản thử 26/10 | 268 mẫu localhost; `parse_log.py`, `parse_runs.py`, samples + metadata; chưa QA log NetEm |
+| T07–T08 | Schema CSV & parser cơ bản (P1) | Tuyến | ✅ bản thử 26/10 | 268 mẫu localhost; `parse_log.py`, `parse_runs.py` (**CŨ — thay bằng** `batch_process.py`), samples + metadata; chưa QA log NetEm |
 | T09 | Chạy được 3 chế độ | Tùng | ✅ | Server cần `-l` |
 | — | Kiểm tra mã `ntpnode.py` | Tùng | ✅ 24/10 | Mục 6 |
 | T10 | `config_scenario.sh` | Tùng | ✅ 24/10 | Bản 25 ms, mục 8.1 |
@@ -849,6 +849,7 @@ sudo ip netns exec ntp-s tcpdump -i veth-s -X udp port 10123            # xem n�
 
 # Runner (chạy trong ~/Desktop/ntp5-exp)
 sudo ./run_matrix.sh test         # 1 run S0/M4, ~5 phút — kiểm thử runner trước khi chạy main
+sudo ./run_matrix.sh s3           # 4 run S3 × M1–M4, ~22 phút — pilot mất gói (fallback, ghép request–response)
 sudo ./run_matrix.sh pilot        # 8 run, ~42 phút
 sudo ./run_matrix.sh main         # 100 run, ~8 giờ 40; bị ngắt → chạy lại đúng lệnh này
 
@@ -884,4 +885,5 @@ Lỗi thường gặp:
 | 24/10/2026 | Tùng (+AI) | Pilot đạt (S4 −15,0 ms, 8/8 ok); T15–T17 ✅; cheat sheet thêm lệnh runner + kiểm tra nhanh |
 | 24/10/2026 | Tùng (+AI) | Thêm `hoc_doan.md` (bản đồ học 12 bài + prompt gia sư). Đóng phiên AI: việc dở dang ghi ở `phantich.md` khối bàn giao (chạy 100 run, gửi pilot cho Tuyến, mời Tuyến vào repo, parse_log.py, tên đề tài) |
 | 26/10/2026 | Tuyến (+AI) | Cập nhật P1: chạy M1–M4 localhost (268 mẫu), parser timed V2 và KPI bản thử; 6 script Python đã merge qua PR #5. Ghi rõ khác định dạng log runner/parser, converter trên nhánh tích hợp, yêu cầu QA pilot thật trước ma trận 100 run. Không thay đổi A0. |
-| 05/11/2026 | Tùng (+AI) | Đưa dữ liệu pilot 24/10 lên repo `runs/pilot/` (PR #9) cho Tuyến. Sửa `run_matrix.sh` theo yêu cầu Tuyến: dừng theo 120 request MEASURE, kiểm tra số đếm trước khi `ok`, thêm 5 cột measure_*, thêm pha `test` (B-10.1, Q14). **Chưa chạy thử trên VM.** |
+| 05/11/2026 | Tùng (+AI) | Đưa dữ liệu pilot 24/10 lên repo `runs/pilot/` (PR #9) cho Tuyến. Sửa `run_matrix.sh` theo yêu cầu Tuyến: dừng theo 120 request MEASURE, kiểm tra số đếm trước khi `ok`, thêm 5 cột measure_*, thêm pha `test` (B-10.1, Q14). |
+| 06/11/2026 | Tuyến (+AI) | **Batch pipeline:** thêm `batch_process.py` (đọc `plan.csv`, tự động convert → parse_v2 → analyze cho mọi run, gộp KPI thành `kpi_summary.csv` + `kpi_by_mode_scenario.csv`). Thêm `plot_kpi.py` (5 biểu đồ theo mục 10.3). Sửa `analyze_runs.py`: MAE/P95 giờ tính trên **tất cả** mẫu (bao gồm fallback Basic khi yêu cầu Interleaved), đồng thời báo cả `mae_matched_ms`/`p95_matched_ms` để so sánh. Sửa mốc warm-up mục 10.1 cho khớp code (request đầu tiên, không phải dòng log đầu). Cập nhật Bước 2 → ✅, ghi chú file cũ trong README. |
