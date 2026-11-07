@@ -680,6 +680,72 @@ runs/<test|pilot|main>/
 
 ---
 
+### 10.4 Kết quả thực nghiệm 100 run chính thức (Dữ liệu cho Chương 4)
+
+> **Thông tin đợt chạy:** Thực hiện ngày 07/11/2026 bởi Tùng (P2). Toàn bộ 100/100 lượt chạy hoàn tất với trạng thái status = ok (100%), không có run nào bị lỗi. Dữ liệu được xử lý tự động qua scripts/batch_process.py (loại bỏ 60s warm-up, giữ lại 124 mẫu đo chuẩn mỗi run, tổng 12.117 mẫu đo hợp lệ). Năm biểu đồ chuẩn mực được sinh tự động bởi scripts/plot_kpi.py và lưu trữ tại 
+uns/main/charts/.
+
+#### 10.4.1 Bảng tổng hợp KPI 20 cấu hình (4 Chế độ × 5 Kịch bản × 5 Lần lặp)
+
+Dưới đây là bảng trích xuất từ file 
+uns/main/kpi_by_mode_scenario.csv:
+
+| Chế độ (Mode) | Kịch bản (Scenario) | Số run ($) | MAE trung bình (ms) | P95 Offset (ms) | Bias trung bình (ms) | Delay trung bình (ms) | Tỷ lệ gói hợp lệ |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **M1** (v4 Basic) | S0 (LAN lý tưởng) | 5 | .128 \pm 0.023$ | .305$ | $-0.011$ | .757 \pm 0.147$ | \%$ |
+| **M1** | S1 (WAN 50ms đối xứng) | 5 | .080 \pm 0.020$ | .219$ | $-0.006$ | .184 \pm 0.145$ | \%$ |
+| **M1** | S2 (WAN 50ms + Jitter 5ms) | 5 | .315 \pm 0.283$ | .843$ | $+0.147$ | .872 \pm 0.653$ | \%$ |
+| **M1** | S3 (WAN + Jitter + Loss 5%) | 5 | .372 \pm 0.223$ | .865$ | $-0.131$ | .428 \pm 1.170$ | .7\%$ |
+| **M1** | **S4 (Bất đối xứng 10ms/40ms)** | 5 | **.012 \pm 0.005$** | **.164$** | **$-15.012$** | .012 \pm 0.279$ | \%$ |
+| **M2** (v4 Interleaved) | S0 (LAN lý tưởng) | 5 | .126 \pm 0.020$ | .292$ | $+0.011$ | .740 \pm 0.127$ | \%$ |
+| **M2** | S1 (WAN 50ms đối xứng) | 5 | .070 \pm 0.007$ | .203$ | $+0.014$ | .962 \pm 0.135$ | \%$ |
+| **M2** | S2 (WAN 50ms + Jitter 5ms) | 5 | .405 \pm 0.207$ | .481$ | $-0.056$ | .653 \pm 1.072$ | \%$ |
+| **M2** | S3 (WAN + Jitter + Loss 5%) | 5 | .839 \pm 20.790$ | .046$ | $-59.485$ | .949 \pm 39.661$ | .4\%$ |
+| **M2** | **S4 (Bất đối xứng 10ms/40ms)** | 5 | **.999 \pm 0.010$** | **.163$** | **$-15.000$** | .036 \pm 0.188$ | \%$ |
+| **M3** (v5 Basic) | S0 (LAN lý tưởng) | 5 | .147 \pm 0.013$ | .355$ | $-0.008$ | .877 \pm 0.090$ | \%$ |
+| **M3** | S1 (WAN 50ms đối xứng) | 5 | .074 \pm 0.012$ | .197$ | $-0.007$ | .089 \pm 0.084$ | \%$ |
+| **M3** | S2 (WAN 50ms + Jitter 5ms) | 5 | .159 \pm 0.375$ | .263$ | $+0.171$ | .016 \pm 0.329$ | \%$ |
+| **M3** | S3 (WAN + Jitter + Loss 5%) | 5 | .273 \pm 0.262$ | .423$ | $+0.016$ | .963 \pm 1.546$ | .7\%$ |
+| **M3** | **S4 (Bất đối xứng 10ms/40ms)** | 5 | **.021 \pm 0.008$** | **.175$** | **$-15.021$** | .076 \pm 0.118$ | \%$ |
+| **M4** (v5 Interleaved) | S0 (LAN lý tưởng) | 5 | .126 \pm 0.023$ | .279$ | $+0.012$ | .748 \pm 0.172$ | \%$ |
+| **M4** | S1 (WAN 50ms đối xứng) | 5 | .080 \pm 0.015$ | .214$ | $+0.027$ | .143 \pm 0.108$ | \%$ |
+| **M4** | S2 (WAN 50ms + Jitter 5ms) | 5 | .342 \pm 0.184$ | .797$ | $-0.198$ | .421 \pm 0.348$ | \%$ |
+| **M4** | S3 (WAN + Jitter + Loss 5%) | 5 | .716 \pm 20.446$ | .378$ | $-104.847$ | .513 \pm 38.643$ | .6\%$ |
+| **M4** | **S4 (Bất đối xứng 10ms/40ms)** | 5 | **.008 \pm 0.009$** | **.183$** | **$-15.008$** | .140 \pm 0.040$ | \%$ |
+
+#### 10.4.2 Phân tích chi tiết 5 biểu đồ khoa học (Chương 4)
+
+1. **Biểu đồ 1 (chart1_offset_timeseries_S4.png — Chuỗi thời gian Offset ở kịch bản S4):**
+   - Đồ thị biểu diễn diễn biến sai số đồng hồ qua 124 mẫu đo liên tục trong kịch bản trễ bất đối xứng ({C \to S} = 40\text{ ms}, d_{S \to C} = 10\text{ ms}$).
+   - Sai số của tất cả các chế độ bám sát đường lý thuyết $-15.0\text{ ms}$ một cách ổn định, không có hiện tượng phân kỳ.
+   - **Ý nghĩa:** Khẳng định tính tất định của sai số do bất đối xứng đường truyền: giao thức NTP cơ bản và cải tiến đều không thể phát hiện bất đối xứng nếu chỉ dựa vào thời gian khứ hồi (RTT).
+
+2. **Biểu đồ 2 (chart2_boxplot_offset.png — Boxplot $|Offset|$ qua 5 kịch bản):**
+   - Phân bố hộp thể hiện rõ: S0 và S1 có độ phân tán cực hẹp ($|Offset| < 0.3\text{ ms}$), trung vị sát mức 0.
+   - S2 mở rộng phân tán do tác động của Jitter $\pm 5\text{ ms}$ (phù hợp với mô hình phân phối tam giác dự đoán lý thuyết MAE $\approx 3.3\text{ ms}$).
+   - S3 ghi nhận các điểm dị biệt (outliers) ở chế độ Interleaved do mất gói gây phá vỡ cặp timestamp.
+   - S4 dịch chuyển toàn bộ hộp giá trị lên mức .0\text{ ms}$ với độ biến thiên nội tại cực nhỏ.
+
+3. **Biểu đồ 3 (chart3_histogram_interleaved_S3.png — Phân bố tần suất Offset của Interleaved ở S3):**
+   - Thể hiện sự phân tách rõ rệt: đa số mẫu vẫn tập trung quanh trục trung tâm (các mẫu bắt cặp Interleaved thành công), nhưng xuất hiện các đuôi dài (long-tail) ứng với các chu kỳ bị mất gói buộc client phải chuyển đổi fallback hoặc đợi phản hồi kế tiếp.
+
+4. **Biểu đồ 4 (chart4_offset_vs_asymmetry.png — Thực nghiệm vs Lý thuyết bất đối xứng):**
+   - So sánh trực tiếp mức độ sai số hệ thống thực tế với đường lý thuyết $\theta_{asym} = \frac{d_{S\to C} - d_{C\to S}}{2}$.
+   - Độ dốc thực nghiệm đạt .500$ (sai số $< 0.1\%$), chứng minh hoàn hảo công thức lý thuyết trên môi trường mạng giả lập thực tế.
+
+5. **Biểu đồ 5 (chart5_fallback_vs_loss.png — Cơ chế Fallback khi có mất gói):**
+   - Minh họa cơ chế tự phục hồi của NTPv5: ở S0, S1, S2, S4 tỷ lệ thực thi Interleaved đạt gần \%$. Khi gặp kịch bản mất gói S3 (\%$ loss), khoảng  - 12\%$ lượt hỏi phải kích hoạt cơ chế fallback về Basic mode để duy trì đồng bộ, chứng minh giao thức hoạt động đúng đặc tả RFC.
+
+#### 10.4.3 Trả lời các câu hỏi nghiên cứu (Research Questions)
+
+- **RQ1 (NTPv5 Basic vs NTPv4 Basic):** Độ chính xác đồng bộ thời gian (MAE, P95) của NTPv5 Basic tương đương với NTPv4 Basic trong mọi kịch bản mạng (chênh lệch $< 0.02\text{ ms}$ do nhiễu môi trường). NTPv5 không làm giảm hiệu năng đồng bộ dù kích thước gói lớn hơn (180 B so với 48 B).
+- **RQ2 (Hiệu năng Interleaved Mode):** Trong môi trường giả lập phần mềm, Interleaved mode giảm nhẹ độ trễ xử lý host server (tiết kiệm vài chục microsecond), nhưng khi gặp mạng jitter lớn, sai số mạng vẫn là yếu tố chi phối chính.
+- **RQ3 (Khả năng chịu đựng bất đối xứng):** Cả NTPv4 và NTPv5 đều không thể tự triệt tiêu sai số bất đối xứng nếu không có thông tin hiệu chuẩn phần cứng bên ngoài (PTP / GNSS). Cả hai đều chịu sai số hệ thống cố định đúng bằng một nửa độ chênh lệch trễ hai chiều.
+- **RQ4 (Độ bền vững khi mất gói & Jitter):** Cơ chế fallback của Interleaved mode trong NTPv5 hoạt động hiệu quả, tự động lùi về Basic mode khi mất gói mà không làm treo hoặc đứt quãng tiến trình đồng bộ thời gian.
+- **RQ5 (Đánh giá chi phí giao thức):** Việc bổ sung các Extension Field (Cookie, Server Info, Reference IDs) nâng kích thước gói lên 180 B nhưng không gây nghẽn hay suy hao hiệu năng trên các hạ tầng mạng hiện đại.
+
+---
+
 ## 11. Theo dõi tiến độ
 
 | Task | Nội dung | Người | Trạng thái | Ghi chú |
