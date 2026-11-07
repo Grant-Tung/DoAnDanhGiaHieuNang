@@ -1,2 +1,2 @@
 run_id,scenario,rep,mode_id,protocol_requested,mode_requested,warmup_requests,warmup_valid,measure_requests,measure_responses,measure_valid,measure_interleaved,valid_ratio,interleaved_ratio
-main-b3-08_S3_M1_timed,S3,3,M1,NTPv4,Basic,30,30,96,88,88,0,0.9166666666666666,
+main-b3-08_S3_M1_timed,S3,3,M1,NTPv4,Basic,30,30,124,111,111,0,0.8951612903225806,
