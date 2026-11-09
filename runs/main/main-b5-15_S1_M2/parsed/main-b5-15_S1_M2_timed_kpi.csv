@@ -1,0 +1,2 @@
+run_id,scenario,rep,mode_id,measure_requests,measure_responses,measure_valid,matched_samples,fallback_samples,interleaved_samples,bias_ms,mae_ms,p95_abs_offset_ms,std_offset_ms,mean_delay_ms,p95_delay_ms,mae_matched_ms,p95_matched_ms,valid_ratio,interleaved_ratio
+main-b5-15_S1_M2_timed,S1,5,M2,124,124,124,124,0,124,0.02495967741935484,0.059717741935483876,0.18809999999999985,0.09261621126192209,50.983370967741934,51.55395,0.059717741935483876,0.18809999999999985,1.0,1.0
