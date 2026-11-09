@@ -1,97 +1,59 @@
-# Đồ án: Đánh giá hiệu năng NTPv4 / NTPv5
+# Đánh giá hiệu năng NTPv4 / NTPv5
 
-Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & dữ liệu).
+Đồ án môn Đánh giá hiệu năng hệ thống – Nhóm 14 (Nguyễn Ngọc Tuyến, Nguyễn Công Tùng), UIT.
 
-## Các file
+Đo sai số ước lượng offset của NTPv4 và NTPv5 (`ntp5-exp`) ở 4 chế độ (Basic/Interleaved) và 5 kịch bản mạng giả lập bằng NetEm. Tổng cộng 100 run. Ghi chú chi tiết xem [doan.md](doan.md).
 
-| File | Vai trò | Ai đọc | Khi nào sửa |
-|---|---|---|---|
-| `doan.md` | **Sổ theo dõi chính**. Phần A: đọc nhanh, dễ hiểu. Phần B: chi tiết chính xác để làm thí nghiệm và viết báo cáo | Tùng, Tuyến | Mỗi khi xong việc, chạy thí nghiệm, hoặc **chốt** một quyết định |
-| `scripts/` | NetEm/runner (Tùng) và các script Python parser/KPI (Tuyến); một converter ở nhánh `Tuyen-integration` | Cả hai | Khi thay đổi công cụ, kiểm tra chạy và ghi rõ trạng thái nghiệm thu |
+## Cấu trúc
+
+```
+doan.md            ghi chú đồ án: phạm vi, kết quả, tiến độ
+scripts/           script lab, chạy thực nghiệm và xử lý dữ liệu
+runs/pilot/        8 run thử (S0, S4)
+runs/main/         100 run chính, KPI tổng hợp và biểu đồ
+ntp5-exp           công cụ NTPv5 (submodule, commit fe19210)
+ntp5-exp.zip       log và PCAP thô của 100 run
+```
 
 ## Scripts
 
-| Script | Vai trò | Trạng thái |
-|---|---|---|
-| `scripts/run_matrix.sh` | Runner chạy ma trận thí nghiệm | ✅ Dùng chính |
-| `scripts/config_scenario.sh` | Cấu hình NetEm S0–S4 | ✅ Dùng chính |
-| `scripts/convert_runner_log.py` | Chuyển `client.log` (epoch) → timed log (elapsed + WARMUP/MEASURE) | ✅ Dùng chính |
-| `scripts/parse_timed_v2.py` | Parser v2: đọc timed log → samples + metadata CSV | ✅ Dùng chính |
-| `scripts/analyze_runs.py` | Tính KPI cho 1 run từ samples + metadata | ✅ Dùng chính |
-| `scripts/batch_process.py` | **MỚI** — chạy pipeline cho tất cả run (đọc plan.csv, gộp kết quả) | ✅ Dùng chính |
-| `scripts/plot_kpi.py` | **MỚI** — vẽ 5 biểu đồ theo mục 10.3 doan.md | ✅ Dùng chính |
-| `scripts/capture_timed.py` | Chạy client localhost (dùng thử) | 🟡 Thử nghiệm |
+| Script | Chức năng |
+|---|---|
+| `setup_lab.sh` | Tạo 2 namespace và veth |
+| `config_scenario.sh` | Cấu hình NetEm S0–S4 |
+| `run_matrix.sh` | Chạy ma trận thí nghiệm (`test`, `pilot`, `main`) |
+| `convert_runner_log.py` | Chuyển log của runner sang dạng timed (WARMUP/MEASURE) |
+| `parse_timed_v2.py` | Tách mẫu offset/delay ra CSV |
+| `analyze_runs.py` | Tính KPI cho 1 run |
+| `batch_process.py` | Chạy toàn bộ pipeline cho mọi run và gộp KPI |
+| `plot_kpi.py` | Vẽ biểu đồ |
+| `qa_runs.py` | Đối chiếu KPI của các run pilot |
+| `s3_robust_stats.py` | Median và MAE sau khi loại outlier tại S3 |
+| `capture_timed.py` | Chạy thử client trên localhost |
 
-## Tiến độ gần nhất (07/11/2026)
-
-- **ĐÃ HOÀN TẤT 100/100 RUN THỰC NGHIỆM:** Tùng đã hoàn tất chạy toàn bộ ma trận chính 100 run trên Ubuntu VMware (run_matrix.sh main, 4 mode x 5 kịch bản x 5 lần lặp, ~9 tiếng) với 100% status = ok.
-- **Pipeline tự động hóa hoàn tất:** `batch_process.py --phase main` đã xử lý 100 run (khử warm-up 60s, parse v2, analyze KPI), sinh thành công `runs/main/kpi_summary.csv` và `runs/main/kpi_by_mode_scenario.csv`.
-- **Đã sinh đủ 5 biểu đồ khoa học:** `plot_kpi.py --phase main` đã vẽ và lưu 5 biểu đồ tại `runs/main/charts/` theo đúng đề cương mục 10.3.
-- **Bàn giao GitHub:** Đã tạo [PR #13](https://github.com/Grant-Tung/DoAnDanhGiaHieuNang/pull/13) gộp toàn bộ kết quả KPI và biểu đồ vào `main`. Toàn bộ dữ liệu và phân tích sẵn sàng 100% để Tuyến dán vào Chương 4 báo cáo.
-
-**Phạm vi đánh giá không đổi:** 4 mode (M1–M4), 5 kịch bản (S0–S4), 5 lần lặp = 100 run. Localhost và log giả lập chỉ dùng thử công cụ, không phải số liệu kết luận.
-
-## Dữ liệu đối chiếu & Xác minh chất lượng (QA Verification cho Tuyến)
-
-Để phục vụ đối chiếu và nghiệm thu trước khi đưa số liệu vào Chương 4:
-1. **Thông tin Runner đã chạy 100 run:**
-   - Script chạy: `run_matrix.sh` (chạy timeout cố định CLIENT_SECS=310s).
-   - Mã băm SHA-256: 2B2C03FF56E08E1F374E7D2B86EA63551F2332E954D50A632FBC9C20D0744FC8.
-   - Tool commit: fe19210790b2a1cbd951e3e5066dca094dd62a52 (draft-09+ của Miroslav Lichvar).
-   - Cơ chế mẫu: 310s gửi ~154 request; trừ 60s warm-up (30 request đầu) -> 99 run có đúng **124 request MEASURE** chuẩn.
-2. **Giải trình run main-b3-08_S3_M1 (96 request MEASURE):**
-   - Vô tình bị dừng sớm bằng Ctrl+C lúc 03:42 sáng ở giây thứ ~250.
-   - Gửi được 126 request, trừ 30 warm-up còn 96 request MEASURE (nhận 88 response, tỷ lệ nhận 91.7%, đúng 5% loss).
-   - Runner cũ gán STATUS=ok khi VALID > 0 (118 mẫu > 0) nên metadata ghi ok.
-3. **Các tệp đối chiếu đã đưa lên Git:**
-   - 3 thư mục run đối chiếu đầy đủ log & PCAP trong `runs/main/`:
-     + `runs/main/main-b3-08_S3_M1/`: Run S3/M1 96 request.
-     + `runs/main/main-b1-02_S3_M2/`: Run S3/M2 kiểm chứng Interleaved NTPv4 khi mất gói.
-     + `runs/main/main-b1-13_S3_M4/`: Run S3/M4 kiểm chứng Interleaved NTPv5 khi mất gói.
-   - Toàn bộ 100 run log thô có sẵn trong `ntp5-exp.zip`.
-
-## Chạy nhanh (sau khi có dữ liệu)
+## Chạy lại phân tích
 
 ```bash
-# 1. Xử lý tất cả run (convert → parse → analyze → gộp KPI)
-python scripts/batch_process.py --phase pilot   # hoặc main
-# → Output: runs/pilot/kpi_summary.csv, kpi_by_mode_scenario.csv
-
-# 2. Thống kê bền vững tại S3 (Median, MAE loại outlier > 100 ms)
+python scripts/batch_process.py --phase main      # ra runs/main/kpi_summary.csv, kpi_by_mode_scenario.csv
+python scripts/plot_kpi.py --phase main           # ra runs/main/charts/*.png (cần matplotlib)
 python scripts/s3_robust_stats.py runs/main S3 100
-
-# 3. Vẽ biểu đồ
-pip install matplotlib   # chỉ cần lần đầu
-python scripts/plot_kpi.py --phase pilot
-# → Output: runs/pilot/charts/chart1_*.png ... chart5_*.png
 ```
 
-## Cách làm việc với 2 nhánh
+## Ghi chú về dữ liệu
 
-| Nhánh | Ai sửa |
-|---|---|
-| `main` | Bản đã thống nhất — **không sửa trực tiếp** |
-| `Tung` | Tùng |
-| `Tuyen` | Tuyến |
+- Runner: `run_matrix.sh`, công cụ `ntp5-exp` commit `fe19210790b2a1cbd951e3e5066dca094dd62a52`.
+- Run `main-b3-08_S3_M1` bị dừng sớm (Ctrl+C) nên chỉ có 96 request MEASURE; run này vẫn được giữ lại và có ghi chú.
+- Ba run có đủ log và PCAP để đối chiếu: `main-b3-08_S3_M1`, `main-b1-02_S3_M2`, `main-b1-13_S3_M4`.
 
-### Mỗi lần làm việc
+## Làm việc với Git
+
+- `main` là bản thống nhất, không sửa trực tiếp.
+- Mỗi người làm trên nhánh riêng (`Tung`, `Tuyen`) rồi mở Pull Request vào `main`.
+
 ```bash
-git checkout Tung              # Tuyến dùng: git checkout Tuyen
-git pull origin main           # lấy bản thống nhất mới nhất về nhánh mình
-# ... sửa file ...
-git add .
-git commit -m "Mô tả ngắn việc đã làm"
+git checkout Tung
+git pull origin main
+# sửa file
+git add . && git commit -m "Mô tả ngắn"
 git push origin Tung
 ```
-
-### So sánh và gộp
-- Xem khác nhau giữa 2 nhánh: trên GitHub mở `Compare` → chọn `Tung` ... `Tuyen`
-  hoặc trên máy: `git diff origin/Tung origin/Tuyen -- doan.md`
-- Bên nào hợp lý → tạo **Pull Request** từ nhánh đó vào `main` → cả hai xem → **Merge**.
-- Sau khi merge, người còn lại chạy `git pull origin main` trên nhánh mình để cập nhật.
-- Nếu GitHub báo **conflict** (hai người sửa cùng một dòng): mở file, giữ đoạn đúng, xoá các dòng `<<<<<<<`, `=======`, `>>>>>>>`, rồi commit.
-
-### Quy ước
-- Mỗi commit nhỏ, một việc; message ghi rõ (ví dụ: `T10: thêm config_scenario.sh`).
-- Thêm dòng vào mục "Lịch sử thay đổi file" trong `doan.md` khi sửa nội dung quan trọng.
-- Script và dữ liệu sau này: `scripts/`, `results/`, `logs/` (log/PCAP lớn không đưa lên Git — lưu Drive và ghi đường dẫn trong metadata).
