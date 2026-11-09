@@ -7,9 +7,6 @@ Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & d�
 | File | Vai trò | Ai đọc | Khi nào sửa |
 |---|---|---|---|
 | `doan.md` | **Sổ theo dõi chính**. Phần A: đọc nhanh, dễ hiểu. Phần B: chi tiết chính xác để làm thí nghiệm và viết báo cáo | Tùng, Tuyến | Mỗi khi xong việc, chạy thí nghiệm, hoặc **chốt** một quyết định |
-| `phanbien_nangcap.md` | **Hộp góp ý**: ý tưởng, sửa phương pháp **chưa chốt** | Tùng, Tuyến, AI | Khi có góp ý mới; khi một đề xuất được chấp nhận/bác bỏ |
-| `phantich.md` | **Bàn giao cho AI**: đọc khối "BÀN GIAO" ở đầu file là AI mới làm tiếp được | AI | Khi trạng thái đồ án thay đổi đáng kể |
-| `hoc_doan.md` | **Học đồ án**: bản đồ 12 bài + prompt cho AI gia sư | Tùng, Tuyến | Khi phạm vi/kết quả đồ án thay đổi |
 | `scripts/` | NetEm/runner (Tùng) và các script Python parser/KPI (Tuyến); một converter ở nhánh `Tuyen-integration` | Cả hai | Khi thay đổi công cụ, kiểm tra chạy và ghi rõ trạng thái nghiệm thu |
 
 ## Scripts
@@ -24,9 +21,6 @@ Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & d�
 | `scripts/batch_process.py` | **MỚI** — chạy pipeline cho tất cả run (đọc plan.csv, gộp kết quả) | ✅ Dùng chính |
 | `scripts/plot_kpi.py` | **MỚI** — vẽ 5 biểu đồ theo mục 10.3 doan.md | ✅ Dùng chính |
 | `scripts/capture_timed.py` | Chạy client localhost (dùng thử) | 🟡 Thử nghiệm |
-| `scripts/parse_timed.py` | ⚠️ **CŨ** — parser v1 (thư mục output cứng `~/ntpv5-project/results/parsed`). Dùng `parse_timed_v2.py` thay thế | ❌ Không dùng |
-| `scripts/parse_log.py` | ⚠️ **CŨ** — parser localhost cứng đường dẫn. Dùng `batch_process.py` thay thế | ❌ Không dùng |
-| `scripts/parse_runs.py` | ⚠️ **CŨ** — parser localhost v2, vẫn cứng `~/ntpv5-project/results/`. Dùng `batch_process.py` thay thế | ❌ Không dùng |
 
 ## Tiến độ gần nhất (07/11/2026)
 
@@ -41,28 +35,20 @@ Nhóm: Tùng (P2 — mạng & thực nghiệm), Tuyến (P1 — giao thức & d�
 
 Để phục vụ đối chiếu và nghiệm thu trước khi đưa số liệu vào Chương 4:
 1. **Thông tin Runner đã chạy 100 run:**
-   - Script chạy: 
-un_matrix.sh (chạy timeout cố định CLIENT_SECS=310s).
+   - Script chạy: `run_matrix.sh` (chạy timeout cố định CLIENT_SECS=310s).
    - Mã băm SHA-256: 2B2C03FF56E08E1F374E7D2B86EA63551F2332E954D50A632FBC9C20D0744FC8.
-   - Tool commit: e19210790b2a1cbd951e3e5066dca094dd62a52 (draft-09+ của Miroslav Lichvar).
+   - Tool commit: fe19210790b2a1cbd951e3e5066dca094dd62a52 (draft-09+ của Miroslav Lichvar).
    - Cơ chế mẫu: 310s gửi ~154 request; trừ 60s warm-up (30 request đầu) -> 99 run có đúng **124 request MEASURE** chuẩn.
 2. **Giải trình run main-b3-08_S3_M1 (96 request MEASURE):**
    - Vô tình bị dừng sớm bằng Ctrl+C lúc 03:42 sáng ở giây thứ ~250.
    - Gửi được 126 request, trừ 30 warm-up còn 96 request MEASURE (nhận 88 response, tỷ lệ nhận 91.7%, đúng 5% loss).
    - Runner cũ gán STATUS=ok khi VALID > 0 (118 mẫu > 0) nên metadata ghi ok.
 3. **Các tệp đối chiếu đã đưa lên Git:**
-   - Tệp nén tổng hợp: 
-uns_verification_for_Tuyen.zip (148 KB).
-   - 3 thư mục run đối chiếu đầy đủ log & PCAP trong 
-uns/main/:
-     + 
-uns/main/main-b3-08_S3_M1/: Run S3/M1 96 request.
-     + 
-uns/main/main-b1-02_S3_M2/: Run S3/M2 kiểm chứng Interleaved NTPv4 khi mất gói.
-     + 
-uns/main/main-b1-13_S3_M4/: Run S3/M4 kiểm chứng Interleaved NTPv5 khi mất gói.
-   - Toàn bộ 100 run log thô có sẵn trong 
-tp5-exp.zip.
+   - 3 thư mục run đối chiếu đầy đủ log & PCAP trong `runs/main/`:
+     + `runs/main/main-b3-08_S3_M1/`: Run S3/M1 96 request.
+     + `runs/main/main-b1-02_S3_M2/`: Run S3/M2 kiểm chứng Interleaved NTPv4 khi mất gói.
+     + `runs/main/main-b1-13_S3_M4/`: Run S3/M4 kiểm chứng Interleaved NTPv5 khi mất gói.
+   - Toàn bộ 100 run log thô có sẵn trong `ntp5-exp.zip`.
 
 ## Chạy nhanh (sau khi có dữ liệu)
 
@@ -71,30 +57,14 @@ tp5-exp.zip.
 python scripts/batch_process.py --phase pilot   # hoặc main
 # → Output: runs/pilot/kpi_summary.csv, kpi_by_mode_scenario.csv
 
-# 2. Vẽ biểu đồ
+# 2. Thống kê bền vững tại S3 (Median, MAE loại outlier > 100 ms)
+python scripts/s3_robust_stats.py runs/main S3 100
+
+# 3. Vẽ biểu đồ
 pip install matplotlib   # chỉ cần lần đầu
 python scripts/plot_kpi.py --phase pilot
 # → Output: runs/pilot/charts/chart1_*.png ... chart5_*.png
 ```
-
-## Vòng đời của một ý tưởng
-
-```
-Góp ý mới ──► phanbien_nangcap.md  (ghi: ⏳ chờ duyệt)
-                  │
-        Cả hai bàn, quyết định
-           │                 │
-     ✅ Chấp nhận        ❌ Bác bỏ
-           │                 │
-  Chuyển vào doan.md    Giữ trong phanbien, ghi lý do
-  (Phần B + Phần A nếu cần, ghi mục 19)
-           │
-  Cập nhật khối "Trạng thái hiện tại" trong phantich.md
-```
-
-## Khi dùng AI
-- Mở cuộc trò chuyện mới → dán (hoặc đính kèm) `phantich.md` + `doan.md` → nói: *"Đọc khối BÀN GIAO trong phantich.md rồi tiếp tục việc tiếp theo."*
-- Xong buổi làm việc → nhắc AI: *"Cập nhật doan.md (tiến độ, lịch sử) và khối Trạng thái hiện tại trong phantich.md."* → commit + push.
 
 ## Cách làm việc với 2 nhánh
 

@@ -1,0 +1,2 @@
+run_id,scenario,rep,mode_id,protocol_requested,mode_requested,warmup_requests,warmup_valid,measure_requests,measure_responses,measure_valid,measure_interleaved,valid_ratio,interleaved_ratio
+main-b3-20_S3_M4_timed,S3,3,M4,NTPv5,Interleaved,30,27,124,115,115,115,0.9274193548387096,1.0
